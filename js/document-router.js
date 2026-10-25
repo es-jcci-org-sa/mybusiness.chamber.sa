@@ -82,18 +82,37 @@
       else if(String(data.status||'').trim()==='مصدقة') st.classList.add('lbl-success');
     }
 
-    // Optional PDF support: if data/<id>.pdf exists, restore the report button.
-    var pdf=url('data/'+encodeURIComponent(id)+'.pdf');
+    // Open Letter is always visible. If a PDF exists, open it. If not,
+    // reproduce the original no-document behavior by reloading this same URL.
+    var pdfName=(data && data.pdfFile) ? String(data.pdfFile).trim() : (id+'.pdf');
+    var pdf=url('data/'+encodeURIComponent(pdfName));
     var panel=document.getElementById('MainContent_PnlOpenReportInfomation');
     var btn=document.getElementById('MainContent_btnOpenReportAccess');
+    var pdfExists=false;
     if(panel && btn){
+      panel.style.display='';
       try {
         var head=await fetch(pdf,{method:'HEAD',cache:'no-store'});
-        if(head.ok){
-          panel.style.display='';
-          btn.onclick=function(e){ e.preventDefault(); window.open(pdf,'_blank','noopener'); };
-        } else panel.style.display='none';
-      } catch(_){ panel.style.display='none'; }
+        pdfExists=!!head.ok;
+      } catch(_){ pdfExists=false; }
+      btn.onclick=function(e){
+        e.preventDefault();
+        if(pdfExists){
+          window.open(pdf,'_blank','noopener');
+        } else {
+          // Keep the exact TrID/current record and reload the same page.
+          window.location.reload();
+        }
+      };
+    }
+
+    // Restore the original electronic-services destination instead of the
+    // locally captured Login.aspx.html clone.
+    var servicesLink=document.querySelector('a.secondary-logo');
+    if(servicesLink){
+      servicesLink.setAttribute('href','https://mybusiness.chamber.sa/Login.aspx');
+      servicesLink.removeAttribute('data-cloned-control-id');
+      servicesLink.removeAttribute('data-cloned-control-category');
     }
 
     reveal();
