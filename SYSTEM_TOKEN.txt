@@ -1,0 +1,5 @@
+Route after domain:
+/Requests/ScanQR.aspx?TrID=29004459%7c1233840
+
+routes.json key (decoded):
+29004459|1233840

@@ -1,0 +1,1047 @@
+<!DOCTYPE html><html><head><base href="./"><script>
+(function () {
+  try {
+    // Keep the actual exported document address before restoring the captured
+    // route identity below. Root-absolute hash routers otherwise navigate to
+    // the static server root (/#/route) and discard the clone/project subpath.
+    var physicalDocumentPath = location.pathname;
+    var physicalDocumentSearch = location.search;
+    var physicalDocumentHash = location.hash;
+    // A generated HTML filename is a physical implementation detail, never a
+    // deployment directory. Remove it before deriving the hosting subpath.
+    var currentPath = location.pathname.replace(/\/index\.html(?=\/|$)/ig, '');
+    currentPath = currentPath.endsWith('/') ? currentPath : currentPath + '/';
+    var marker = "/";
+    var markerIndex = currentPath.lastIndexOf(marker);
+    var deploymentBase = markerIndex >= 0 ? currentPath.slice(0, markerIndex) : '';
+    var deploymentRoot = (deploymentBase.replace(/\/+$/, '') || '') + '/';
+    window.__CLONED_DEPLOYMENT_BASE__ = deploymentBase;
+    
+    var base = document.querySelector('base');
+    if (base) base.setAttribute('href', deploymentRoot);
+    function rootHashTarget(value) {
+      if (typeof value !== 'string') return null;
+      try {
+        var parsed = new URL(value, location.href);
+        if (parsed.origin !== location.origin || parsed.pathname !== '/' || !/^#\//.test(parsed.hash)) return null;
+        return physicalDocumentPath + (parsed.search || physicalDocumentSearch) + parsed.hash;
+      } catch (_) { return null; }
+    }
+    function normalizeHistoryUrl(value) {
+      if (typeof value !== 'string') return value;
+      try {
+        var rootHash = rootHashTarget(value);
+        if (rootHash) return rootHash;
+        var parsed = new URL(value, location.href);
+        if (parsed.pathname !== physicalDocumentPath) parsed.pathname = parsed.pathname.replace(/\/index\.html(?=\/|$)/ig, '');
+        return parsed.pathname + parsed.search + parsed.hash;
+      } catch (_) { return value; }
+    }
+    function routeAllowed(value, context) {
+      var guard = window.__CLONED_ROUTE_GUARD__;
+      return !guard || typeof guard.allows !== 'function' || guard.allows(value, context);
+    }
+    var nativeHistory = {};
+    ['pushState', 'replaceState'].forEach(function (method) {
+      var original = history[method];
+      nativeHistory[method] = original;
+      history[method] = function (state, title, url) {
+        var normalized = normalizeHistoryUrl(url);
+        if (url != null && !routeAllowed(normalized)) return;
+        return original.call(history, state, title, normalized);
+      };
+    });
+    // The Navigation API is the only pre-commit browser hook that also covers
+    // location.href, location.assign(), and location.replace(). Anchors and
+    // History API calls remain covered by the fallbacks below.
+    if (window.navigation && window.navigation.addEventListener) {
+      window.navigation.addEventListener('navigate', function (event) {
+        var corrected = event.destination && rootHashTarget(event.destination.url);
+        if (!corrected || !event.cancelable) return;
+        event.preventDefault();
+        if (!routeAllowed(corrected, event)) return;
+        var oldUrl = location.href;
+        var method = event.navigationType === 'replace' ? 'replaceState' : 'pushState';
+        nativeHistory[method].call(history, null, document.title, corrected);
+        window.dispatchEvent(new HashChangeEvent('hashchange', { oldURL: oldUrl, newURL: location.href }));
+      });
+    }
+    document.addEventListener('click', function (event) {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      var anchor = event.target && event.target.closest && event.target.closest('a[href]');
+      if (!anchor || (anchor.target && anchor.target !== '_self') || anchor.hasAttribute('download')) return;
+      var corrected = rootHashTarget(anchor.getAttribute('href'));
+      if (!corrected) return;
+      event.preventDefault();
+      if (!routeAllowed(corrected)) return;
+      var oldUrl = location.href;
+      nativeHistory.pushState.call(history, null, document.title, corrected);
+      window.dispatchEvent(new HashChangeEvent('hashchange', { oldURL: oldUrl, newURL: location.href }));
+    }, true);
+    var capturedRoute = "/pr.aspx";
+    var capturedRootHash = false;
+    var targetRoute = capturedRootHash
+      ? physicalDocumentPath + ("" || physicalDocumentSearch) + (/^#\//.test(physicalDocumentHash) ? physicalDocumentHash : "")
+      : deploymentRoot + capturedRoute.replace(/^\/+/, '');
+    var targetIsPhysicalDocument = targetRoute.replace(/[?#].*$/, '') === physicalDocumentPath;
+    if (location.pathname + location.search + location.hash !== targetRoute) {
+      (capturedRootHash || targetIsPhysicalDocument ? nativeHistory.replaceState : history.replaceState).call(history, null, document.title, targetRoute);
+    }
+    
+  } catch (_) {}
+})();
+</script><script>
+(function () {
+  var resources = {"https://mybusiness.chamber.sa/robots.txt":"assets/robots.txt","https://mybusiness.chamber.sa/styles/DesignVersion3/Login/internal.css":"css/styles/DesignVersion3/Login/internal.css","https://mybusiness.chamber.sa/styles/DesignVersion3/Login/config.css":"css/styles/DesignVersion3/Login/config.css","https://mybusiness.chamber.sa/Scripts/DesignVersion3/Login/common.js":"js/Scripts/DesignVersion3/Login/common.js","https://mybusiness.chamber.sa/ScriptResource.axd?d=IBHrCcsLEsxUVKa-6NHMmRBtpDDeikYm_S_oUy9LAHS9BruvjpYDZ6cTo_WX0Jlrh4MgTWBwYf0zk0geugbhUUhtCmIQHpFuBc64SqMIs2sbOEXL0jSAcGxSB739x-YxI_UOkmTXRtgkPIxL--quU7eeuM9YhDK5-m3jZJdqjSRUegSv0&t=ffffffffbec1863d":"js/ScriptResource--8dbd436d273e8ef0.axd","https://mybusiness.chamber.sa/Scripts/DesignVersion3/Login/config.min.js":"js/Scripts/DesignVersion3/Login/config.min.js","https://mybusiness.chamber.sa/images/designversion3/Login/secondary-logo.png":"images/designversion3/Login/secondary-logo.png","https://mybusiness.chamber.sa/images/designversion3/Login/primary-logo.png":"images/designversion3/Login/primary-logo.png","https://mybusiness.chamber.sa/WebResource.axd?d=t0-swOOAqRuyQzJuzGt4t13jaYuyvfiHgU8XDDitYTnesH0ATredRZmYKw8Gc8N7URh-iVpxm0ZNeotSQrnEa28pu9E1&t=639190952600000000":"js/WebResource--4f6f6b82628ad6df.axd","https://mybusiness.chamber.sa/images/designversion3/Login/profile-icon.png":"images/designversion3/Login/profile-icon.png","https://mybusiness.chamber.sa/Scripts/DesignVersion3/Login/jquery.js":"js/Scripts/DesignVersion3/Login/jquery.js","https://mybusiness.chamber.sa/ScriptResource.axd?d=200W1vvWI35Qn0B6mCpTXybP0ds4-VJ0PMn5Adbqig9I-eMo9HblhB2hjXZEWMA36_Dy1jbmmyA-Xfk1xMtiPaq1lyTXo-H3UucbAOk_nUpdbSWKMn0DZwzySUZUkE4rIvTOBMsimq3hVG8z5WyHYxQUUHm47KnhgpnQlkhB3R8e208m0&t=ffffffffbec1863d":"js/ScriptResource--2264cdc7afc8ac8e.axd","https://mybusiness.chamber.sa/images/designversion3/login/gIcon.svg":"images/designversion3/login/gIcon.svg","https://mybusiness.chamber.sa/images/designversion3/login/ipIcon.svg":"images/designversion3/login/ipIcon.svg","https://mybusiness.chamber.sa/images/designVersion3/Login/login.png":"images/designVersion3/Login/login.png","https://mybusiness.chamber.sa/images/designVersion3/Login/header-bg.jpg":"images/designVersion3/Login/header-bg.jpg","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/fontello.woff2?53989230":"fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.woff2","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/GEFlow-regular.otf":"fonts/Ar/DesignVersion3/GEFlow-regular.otf","https://www.googletagmanager.com/gtag/js?id=G-J484M255FL":"js/gtag/js--1aee01882580bd8c.js","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.woff":"fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.woff","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.woff":"fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.woff","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874669992&gcd=13l3l3l3l1l1&npa=0&dma=0&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=5&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938465~115938469~118897920~118897930~119793974~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=0&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FRequests%2FScanQR.aspx%3FTrID%3D29004459%257c1233840&dt=%D8%A7%D9%84%D8%AA%D8%AD%D9%82%D9%82%20%D9%85%D9%86%20%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D9%85%D9%84%D8%A7%D8%AA&en=page_view&_fv=1&_nsi=1&_ss=1&_ee=1&tfd=3641":"api/g/collect--0710b9c2e3b8a211.json","https://mybusiness.chamber.sa/Requests/ScanQR.aspx?TrID=29004459%7c1233840":"-TrID-29004459_1233840-/index.html","https://mybusiness.chamber.sa/":"index.html","https://mybusiness.chamber.sa/ScriptResource.axd?d=da7d0HAIgHKTSjbbL2nuP92F7BnkuaymcLuX2ncD1fCzMVP4bX6EHn9vl0bm1e558yVulttlq_3kBZl_d6FAcOtungFfta3OHPp31ImXC2TZDOZq0&t=7d5986a":"js/ScriptResource--0a4c6cad8a60686b.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=dnb9CdiFmdTlpWApI_yCSl3FGmCKY7VKMcEgBGb7XAUb6zhBt8p1EpS5JDdLKUrGYZYtuWzoP0rFxS6SQoXzgj3hzlnYxMsJ1sPaGLBbWhWN5Js-wzyg8LSoRME8Ne57l2pNWA2&t=7d5986a":"js/ScriptResource--f908f8ad0faedb59.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=rIwmZAhqu7fyChEzayFYiclY6jE382Xaa5fAVIrk2-5VOSKgmhnZP90t3BlJMwkP9yRa7lXauW-v-wC9zJvYr5ugtE7tRmkYF7tfrI483-j1ZNpdIh4gF4OliBJtokvwuW0VbA2&t=1f1d36c2":"js/ScriptResource--69a3fe63922ac878.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=pNMTo2YHIl-3PgdB21oUqqQDttVGUGwKoVUigZpg_UUzjYgQ-nUcrFyTdZ3R42mHSC3si4ixyk0Y9v86MRog0wGvIHv4hdRF1XTEj78EbA1zEo5K0C0onADyS2yV17M5MbT4kw2&t=7d5986a":"js/ScriptResource--e48f3faa52ad06b8.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=PfKZ24Gu2Ecj6eJVreMTEwvEcSGB0asGJLY5etvuimgRbvsi1H_YzMj7MeweR6ym7LOf1UrZH8b-lSiYlWDLI4IY6wriZKami8CLxAsIt9COzQRfwmZkAEZhix_9S4-fU3sqJQCiDYqpLKm0WGc2uUnleNc1&t=ffffffff9fe38677":"js/ScriptResource--ee11d77a41529b15.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=tZY1u2aj6D_LN7O7D9pG0riRLUkpQHjlH5KmeSRenoF-JBevNVpSIqwFn1ImQ2UDHx8eGea_N30qeQ2vDqxnbcO2CEiGvTDjq85BbWKqsAPUAMj-Pf-NJwOUhkD8drtfR20a5g2&t=1f1d36c2":"js/ScriptResource--dc1599cf43c39cc2.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=KUHIwhbn3L487xT1Zn_spf9sIppXx5CmWPvx9f0tFmuFdlBvJn3M-E9kHfLy89xxEUQJTHmyJaozgcoHas2ZnogL30x6cBXu8wwsLt3vOGf_OKv0LUig1kOssO6vZvW-sk_kPg2&t=7d5986a":"js/ScriptResource--4d871066ac335277.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=yyL8q7nKLIB_cTz_UadtWGYYuegrvzzlXTciGlN5dUKpn6g4OHnx_MEN32-v2r1eDSGQ4iDADbonn3t68BZh-3mKctd0AOws3JCcT-X8BS0JUuZqN5cV6NzSu_ED-BOT7M6puw2&t=7d5986a":"js/ScriptResource--e4408cc7e1270a94.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=Ny7Q4p_vowGTysKvw-4U64BvSUDSmiCqmobgc2c_QV3ZkxUyOScf17OyhpNTIN_bTfKQ8dMXwH9pFPfWNPgYwCzM4OkGNOosq7mjY44Wg4XzYCzLWpD6UfVXmKlVvwXHsvM94A2&t=7d5986a":"js/ScriptResource--aafc7c7c05921f47.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=la53eK5hvzNNCXie4qwcEChCigws5tWQD7CTRf08BTWDW9UgsbY3ARW2WPexF6kUyZdcVGIJNkqgAj2aO7N6Ii3FZ4FhAJKQwkDOS6sVGwO8jwfJWnO6np7EKFvxgJ8DbZLrLQ2&t=7d5986a":"js/ScriptResource--7d6bb79f7a661a0f.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=gZvfg2o3PPTCVipPXViHaEdkacCfeIyFStn8-1C62_YFZYdHDc4j2-3IdOI6yuy5yOkk3w_cwpxXTbKMdPvJE2oTMLwhlQaE3ru0fLMuJeNvSH12J493l4iRIVQMoT9nEILbzg2&t=7d5986a":"js/ScriptResource--d3757ce73bf8b1f7.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=PJWq-uhsoa2l1NjGmaF1-2uAbYX6u8OOMQfTyDr6nyIMMYbO-lr1rCNzkgQUePiWGUJn0WiuVOx6k8nWG_pr7bT9RTBz4rLTEXr71dTdPCxOWJ6_G4YDj_O0jFvofhHx2A29kg2&t=7d5986a":"js/ScriptResource--b1ddc77aec755b8e.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=GrMIee2_ZvSJ770B2M8fR-zCwqj6EXt-Op9tlbb5JuO7Ax75NkBzWwOR7Tj_RIk_0V0sq7xZyJsgz_BGV_ivsQso2BLd7fmcjkk5KKg0qwWrnqtbWyfDUIOdABevc7PBdUU9Fg2&t=7d5986a":"js/ScriptResource--045c2ac57427df48.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=fEwVQ7kOsgqJXjsCYunjU7ZdfTF7YVj3iqoZjabhvVhNCT1Zw_AOLrFzO7ZojpEIMkDElA6ewofPFMar3jFftuhihrqiXwnhvCctrzJGrpkDSzis65mp5uDnGMBDoEgIhKEsCg2&t=7d5986a":"js/ScriptResource--c4b087b225af7b09.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=288mMZ8xFN5ZQHw1gOpWx8vIMkYEe14vGgOYNY-EKTtKH0ssnV2wM2-GU_LMLHXvPCXDSno5OvBUhodFbGo5XQDDKa1OWJv8lRk7n8f7J5Ss6o4L-9t67jreAMJfUlKiiJfX6w2&t=7d5986a":"js/ScriptResource--d9ca821b19a42459.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=7umfi1XA9EN7K0_aOS3MIPQofxjt2sTblMNYlx_BqAdapT53ZBK8tEyC8AZJosNxjAqcBOu4ynOime7gsH_GWSsRJVqRPgdt5tJM7LX3396yWp1Y0&t=7d5986a":"js/ScriptResource--fe9a8c60633bb833.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=i5G8YKEXaqaOzKhibySv1vCOnElrRAsaxCVr5blfgIP38lG5iSxIkwswV6khMRiVex4ZTNaAOXRF9htieDaWEAyTdnMBbZnFK0jIlrlSEyDU98pCtctrEO-690lac8Ae0OwRrA2&t=7d5986a":"js/ScriptResource--81b3f7ffbf522be9.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=cd3dbaff-fe1c-4805-b0d8-6de267c59c8c":"images/Telerik.Web.UI.WebResource--83b338cbf890a4cf.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=bb2e9314-ec59-41b5-ab52-a214f869ec1e":"images/Telerik.Web.UI.WebResource--7d0ba325cc79d603.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=f2393142-374f-45bf-9c6f-edbb60211228":"images/Telerik.Web.UI.WebResource--a623464e8a9f1872.axd","https://mybusiness.chamber.sa/images/designversion3/login/icon99.png":"images/designversion3/login/icon99.png","https://mybusiness.chamber.sa/images/designversion3/login/note.png":"images/designversion3/login/note.png","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=615fcc55-9532-4379-81ef-07aeffcf5841":"images/Telerik.Web.UI.WebResource--ae5a9980127be938.axd","https://mybusiness.chamber.sa/Scripts/DesignVersion3/Login/autoplay.js":"js/Scripts/DesignVersion3/Login/autoplay.js","https://mybusiness.chamber.sa/images/designversion3/login/icon7.png":"images/designversion3/login/icon7.png","https://mybusiness.chamber.sa/images/designVersion3/Login/username.png":"images/designVersion3/Login/username.png","https://mybusiness.chamber.sa/images/designversion3/login/film.png":"images/designversion3/login/film.png","https://mybusiness.chamber.sa/images/designVersion3/Login/password.png":"images/designVersion3/Login/password.png","https://mybusiness.chamber.sa/Images/DesignVersion3/tomoh_final_test.png":"images/DesignVersion3/tomoh_final_test.png","https://mybusiness.chamber.sa/Images/DesignVersion3/monshaat_fit_width.png":"images/DesignVersion3/monshaat_fit_width.png","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874679459&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=18&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616986~115938465~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=512":"api/g/collect--f5fd4a42c4448d85.json","https://www.chamber.sa/PublishingImages/%D8%A8%D9%88%D8%B3%D8%AA%20%D8%AF%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D8%A7%D8%B9%D9%85%D8%A7%D9%84.jpeg":"images/PublishingImages/بوست_دليل_الاعمال.jpeg","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.woff2":"fonts/Ar/DesignVersion3/glyphicons-halflings-regular.woff2","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874679459&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=18&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616986~115938465~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=45&tfd=5518":"api/g/collect--3538ce3a283dcdf2.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=68585f4b-b603-4932-a98a-de1879418d5c":"images/Telerik.Web.UI.WebResource--6cc967cba95945ea.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=beea6c3c-3e9f-47c3-98bc-8939087a639a":"images/Telerik.Web.UI.WebResource--1006faa0ba85921c.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=a2262ca8-fdc4-44bd-9e46-c10f0fc7d758":"images/Telerik.Web.UI.WebResource--d46891b76dbe1403.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=529c69f2-4241-43e1-a000-a0bf9bb857a8":"images/Telerik.Web.UI.WebResource--b3109b0ed14d5c87.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874690554&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=18&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616986~115938465~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=274":"api/g/collect--e56367f9f80153c2.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874690554&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=18&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616986~115938465~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=15&tfd=5284":"api/g/collect--7aa333b1cd9e9c52.json","https://mybusiness.chamber.sa/Login.aspx":"Login.aspx.html","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874701585&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=19&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938466~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FError.aspx%3Faspxerrorpath%3D%2FRequests%2FRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=555":"api/g/collect--31a3264e4ad676b7.json","https://mybusiness.chamber.sa/Requests/RegistrationConditions.aspx":"Requests/RegistrationConditions.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=d3b85c5f-fdaa-4d71-9b74-01a527141463":"images/Telerik.Web.UI.WebResource--6dc159325a75226d.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=3ae6627c-562d-4f71-b5d3-d8a8c126c703":"images/Telerik.Web.UI.WebResource--7e3fd1feefd12eea.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=1cabbffe-1689-491e-9946-948da4ab8ea5":"images/Telerik.Web.UI.WebResource--6235d3b9d53b3a66.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=599f79da-d991-4f5e-a255-62288eb9f3e1":"images/Telerik.Web.UI.WebResource--a3d70fa0a07c196f.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874709749&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=11&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938466~115938469~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252findex.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=489":"api/g/collect--d161201b20b1a52a.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874709749&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=11&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115938466~115938469~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252findex.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=40&tfd=5493":"api/g/collect--d09f6f082f313661.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=9bf394dc-8b12-4767-b11b-5a04f8d9debf":"images/Telerik.Web.UI.WebResource--5f5fa8c1d9e41b20.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=566f0936-727e-4c7b-b802-c90eb353072d":"images/Telerik.Web.UI.WebResource--2abd23cae0c53f1d.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=9534cd20-f765-4a2b-b0a8-0b3f96cd21ff":"images/Telerik.Web.UI.WebResource--c5c3cb095a5ac160.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=73e99751-eb2c-4b23-9b17-8f03ae47d97d":"images/Telerik.Web.UI.WebResource--57c5aca7fcfd6320.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874718015&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=11&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616985~115938466~115938469~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252findex.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=233":"api/g/collect--98e684a77f4048c3.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874718015&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=11&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616985~115938466~115938469~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252findex.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=42&tfd=5239":"api/g/collect--8a14150dda8ffd2e.json","https://mybusiness.chamber.sa/index.aspx":"index.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=a775df24-9a6d-49bc-a281-f5055f46c0d0":"images/Telerik.Web.UI.WebResource--e941b5041a67b034.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874729868&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=14&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938466~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fverify%2Fsanadservice.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=465":"api/g/collect--01c5b5b75f71f4b3.json","https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js":"js/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js","https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js":"js/ajax/libs/jquery/3.7.1/jquery.min.js","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874729868&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=14&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115938466~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fverify%2Fsanadservice.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=41&tfd=5468":"api/g/collect--bb3ef1e60d842b04.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=388441fd-bedd-4075-a224-d77216335f58":"images/Telerik.Web.UI.WebResource--d5fa10405a7ffb18.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874739783&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=2&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616985~115938466~115938469~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fverify%2Fsanadservice.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=329":"api/g/collect--63b28e826009310d.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874739783&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=2&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616985~115938466~115938469~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fverify%2Fsanadservice.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=21&tfd=5330":"api/g/collect--9f5c6c6a2cd612dd.json","https://mybusiness.chamber.sa/verify/sanadservice.aspx":"verify/sanadservice.aspx.html","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874750513&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=9&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938466~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=513":"api/g/collect--e49cc150bc2f15b5.json","https://mybusiness.chamber.sa/RegistrationConditions.aspx":"RegistrationConditions.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=90ce4983-3d92-4d3c-bcea-018d331f6553":"images/Telerik.Web.UI.WebResource--e1b1728691399528.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874758493&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=8&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616985~115938465~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FgetUsername.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=601":"api/g/collect--4b33674aaa660866.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874758493&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=8&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616985~115938465~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FgetUsername.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=10&tfd=5606":"api/g/collect--5e2fa77ec0398e77.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=576e8fb0-fea6-4db1-9186-baa605a8d0bb":"images/Telerik.Web.UI.WebResource--37d4460cdb2626b7.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874767063&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=15&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938466~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FgetUsername.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=5276":"api/g/collect--ab9afd38399e651e.json","https://mybusiness.chamber.sa/getUsername.aspx":"getUsername.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=a03ca3ce-240d-4fd0-b0eb-d846b7e6e26f":"images/Telerik.Web.UI.WebResource--98b2df282b3b1a67.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874777218&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=19&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938465~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fpr.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=672":"api/g/collect--f85f4b00b19de505.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874777218&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=19&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115938465~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fpr.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=9&tfd=5692":"api/g/collect--d85db189ba304a8b.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=4ff448e1-fbde-4639-9cda-5590d69fc5fe":"images/Telerik.Web.UI.WebResource--9e5e60efa91d68ab.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874786581&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=15&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938466~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fpr.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=5387":"api/g/collect--6f88ff38812f6272.json","https://mybusiness.chamber.sa/pr.aspx":"pr.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=e4adca99-732b-4339-964b-0009566775ef":"images/Telerik.Web.UI.WebResource--fcdff5fcb85c5419.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874796563&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=9&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938466~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FChangeMobileNumber.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=614":"api/g/collect--b4ecd28258522201.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874796563&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=9&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115938466~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FChangeMobileNumber.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=8&tfd=5628":"api/g/collect--2a27237b43dda3a9.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=32464353-559d-4038-85c6-164dc80362ab":"images/Telerik.Web.UI.WebResource--d7c4eb15ce95f741.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874805329&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=19&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616985~115938466~115938469~118897920~118897930~119860443~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FChangeMobileNumber.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=5416":"api/g/collect--7678b3b39b727b19.json","https://mybusiness.chamber.sa/ChangeMobileNumber.aspx":"ChangeMobileNumber.aspx.html","https://mybusiness.chamber.sa/Images/DesignVersion3/jadeer_natural_new.png":"images/DesignVersion3/jadeer_natural_new.png","https://mybusiness.chamber.sa/Images/DesignVersion3/mazaya_natural_new.png":"images/DesignVersion3/mazaya_natural_new.png","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874815893&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=3&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616986~115938466~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fextservices%2Fexternalservices.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=526":"api/g/collect--dd5350b4cc0a1195.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874815893&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=3&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616986~115938466~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fextservices%2Fexternalservices.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=9&tfd=5532":"api/g/collect--a4f6eb44ffbe1589.json","https://mybusiness.chamber.sa/extservices/externalservices.aspx":"extservices/externalservices.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=c2ad2fb3-a88a-4569-a944-72c47fbd309d":"images/Telerik.Web.UI.WebResource--c1b6d96edba2394a.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=b119c11f-236a-41d7-bc2a-fc8b7ba9eb66":"images/Telerik.Web.UI.WebResource--03e9b5414ee37039.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=6fe3748f-bdfc-4b38-85ac-191487bf7d69":"images/Telerik.Web.UI.WebResource--a5c55740a569428d.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=76668217-6927-4b61-a5a7-ec6319bc7c6f":"images/Telerik.Web.UI.WebResource--945de4c63579a892.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874827284&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=10&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938465~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252findex.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=489":"api/g/collect--9abf0acb9ba28860.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874827284&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=10&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115938465~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252findex.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=41&tfd=5499":"api/g/collect--b47abf54678fce2c.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=2cc4b227-4823-4d02-98a2-12eb4d25cf4c":"images/Telerik.Web.UI.WebResource--64762757be956d3a.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=eb7bf927-c9b7-4915-90e8-4cef24f34e32":"images/Telerik.Web.UI.WebResource--ace9db0926038804.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=39aa295b-45af-4435-9c77-25f269b6ceb8":"images/Telerik.Web.UI.WebResource--b9768a46329d7be5.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=ee7db213-6130-4d06-8ff1-32bcea0e3bf8":"images/Telerik.Web.UI.WebResource--8182dd075077620f.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874836983&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=13&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616985~115938466~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252findex.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=232":"api/g/collect--b97bace1d090efc7.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874836983&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=13&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616985~115938466~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252findex.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=21&tfd=5237":"api/g/collect--3688fee3aa4b6d62.json","https://mybusiness.chamber.sa/Login.aspx?ReturnUrl=%2findex.aspx":"-ReturnUrl-index.aspx-/index.html","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874848142&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=6&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938465~115938468~118012009~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FError.aspx%3Faspxerrorpath%3D%2Fverify%2FRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=533":"api/g/collect--683733fb8d59c12a.json","https://mybusiness.chamber.sa/verify/RegistrationConditions.aspx":"verify/RegistrationConditions.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=303e047f-e118-404e-8107-db5bb7625b56":"images/Telerik.Web.UI.WebResource--a114729dc0da69ae.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874855832&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=12&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616985~115938465~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fgetusername.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=651":"api/g/collect--d3045d7fdc73aeb3.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874855832&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=12&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616985~115938465~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fgetusername.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=9&tfd=5665":"api/g/collect--b43935a67d38040f.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=f99dac03-dde8-48d2-a51b-8dc1eb2690de":"images/Telerik.Web.UI.WebResource--a7f54fb8c099c43b.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874864651&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=6&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616986~115938465~115938469~118897920~118897930~119860443~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2Fgetusername.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=5276":"api/g/collect--cb6bbfcd7185e7ab.json","https://mybusiness.chamber.sa/getusername.aspx":"getusername.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=f40b488f-14cd-4d6d-b3ef-639af3493317":"images/Telerik.Web.UI.WebResource--cfa59684785cf1b4.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=f383fa96-719c-4705-ad8f-631ae39a74ec":"images/Telerik.Web.UI.WebResource--7a42d7e55ccf48b5.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=e33237db-6923-4745-b914-8d8d2b3b9548":"images/Telerik.Web.UI.WebResource--5dfe62dee83cc10d.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=5017c04f-feac-47a0-b0cd-73aa3de3e11e":"images/Telerik.Web.UI.WebResource--8a1e52c556e84097.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874875035&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=16&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616985~115938465~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252fextservices%252fRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=810":"api/g/collect--02403da56f813462.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874875035&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=16&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616985~115938465~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252fextservices%252fRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=11&tfd=5814":"api/g/collect--bd657f0ca8571bf4.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=f3d5e1f1-9ca7-4c88-829c-67f82b3912f1":"images/Telerik.Web.UI.WebResource--f704a5ad001c6200.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=cdbfbf7b-8d34-4f3b-9404-172ada462c35":"images/Telerik.Web.UI.WebResource--6e8a291fd68d6dd5.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=e217369d-2d46-4dc8-8173-ba707ae39a1d":"images/Telerik.Web.UI.WebResource--482d69ea860d3bd4.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=5fa2f6ad-9d6e-4cb1-acde-50600fd38e33":"images/Telerik.Web.UI.WebResource--611d87142741fe97.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874883860&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=11&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616985~115938465~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252fextservices%252fRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=312":"api/g/collect--5ff6d813a773a3ce.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874883860&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=11&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616985~115938465~115938469~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252fextservices%252fRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=27&tfd=5313":"api/g/collect--a6df13c28086da6f.json","https://mybusiness.chamber.sa/extservices/RegistrationConditions.aspx":"extservices/RegistrationConditions.aspx.html","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=8e9014c4-0dd4-44e0-8f6c-d5c8c57d7931":"images/Telerik.Web.UI.WebResource--fd0a794eeeb7580b.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=47e2cf96-4987-4b81-a5d8-87897a5fcf81":"images/Telerik.Web.UI.WebResource--aaeb3bba7af47fe9.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=1733cce2-2e49-430e-a66d-01573e941ed7":"images/Telerik.Web.UI.WebResource--b432a3de9876cbd5.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=577e1875-4480-4302-945e-c4c95ad39315":"images/Telerik.Web.UI.WebResource--aa7dccf290611e18.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874895659&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=4&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252fextservices%252fRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=728":"api/g/collect--0068aaa93d07fbe6.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874895659&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=4&sr=1440x1000&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115938465~115938468~118897920~118897930~120213116~120385423~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252fextservices%252fRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=9&tfd=5731":"api/g/collect--5f365ee5e2da6431.json","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=e62c82f9-5107-4213-a150-e91aadc2d423":"images/Telerik.Web.UI.WebResource--4a444f04bc505f61.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=e22b4729-d569-40ee-a11d-4a6f75f3e430":"images/Telerik.Web.UI.WebResource--78fb78156c1afb5f.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=e85d1555-86ca-4456-bf5a-56274de687fc":"images/Telerik.Web.UI.WebResource--e5617b40c0422670.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&isc=false&guid=bdb5ea72-29f0-43ae-bd7c-170b49bedd15":"images/Telerik.Web.UI.WebResource--a831a8b172474809.axd","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za208zd9174217177xf1&_p=1792874904305&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAAAAQ&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=18&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=1&tag_exp=115616986~115938466~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252fextservices%252fRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=page_view&_ee=1&tfd=299":"api/g/collect--af804dbdd3b33bf9.json","https://www.google-analytics.com/g/collect?v=2&tid=G-J484M255FL&gtm=45je6al1v9174217177za200zd9174217177xf1&_p=1792874904305&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAAAAQ&ae=a&are=1&cid=1736969034.1792874671&frm=0&ngs=1&pscdl=noapi&rcb=18&sr=390x844&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uam=&uamb=0&uap=Windows&uapv=&uaw=0&ul=en-us&_s=2&tag_exp=115616986~115938466~115938468~118897920~118897930~120213116~120385422~120469145~120469153~121246026~121246034&sid=1792874671&sct=1&seg=1&dl=https%3A%2F%2Fmybusiness.chamber.sa%2FLogin.aspx%3FReturnUrl%3D%252fextservices%252fRegistrationConditions.aspx&dt=%D8%A8%D9%88%D8%A7%D8%A8%D8%A9%20%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A&en=scroll&epn.percent_scrolled=90&_et=32&tfd=5302":"api/g/collect--8f067189b4772fd6.json","https://mybusiness.chamber.sa/Login.aspx?ReturnUrl=%2fextservices%2fRegistrationConditions.aspx":"-ReturnUrl-extservices_RegistrationConditions.aspx-/index.html","https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js":"js/html5shiv/3.7.2/html5shiv.min.js","https://oss.maxcdn.com/respond/1.4.2/respond.min.js":"js/respond/1.4.2/respond.min.js","https://mybusiness.chamber.sa/WebResource.axd?d=t0-swOOAqRuyQzJuzGt4t13jaYuyvfiHgU8XDDitYTnesH0ATredRZmYKw8Gc8N7URh-iVpxm0ZNeotSQrnEa28pu9E1&amp;t=639190952600000000":"js/WebResource--22c325d6f7c67a19.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=200W1vvWI35Qn0B6mCpTXybP0ds4-VJ0PMn5Adbqig9I-eMo9HblhB2hjXZEWMA36_Dy1jbmmyA-Xfk1xMtiPaq1lyTXo-H3UucbAOk_nUpdbSWKMn0DZwzySUZUkE4rIvTOBMsimq3hVG8z5WyHYxQUUHm47KnhgpnQlkhB3R8e208m0&amp;t=ffffffffbec1863d":"js/ScriptResource--27ad5b467058626a.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=IBHrCcsLEsxUVKa-6NHMmRBtpDDeikYm_S_oUy9LAHS9BruvjpYDZ6cTo_WX0Jlrh4MgTWBwYf0zk0geugbhUUhtCmIQHpFuBc64SqMIs2sbOEXL0jSAcGxSB739x-YxI_UOkmTXRtgkPIxL--quU7eeuM9YhDK5-m3jZJdqjSRUegSv0&amp;t=ffffffffbec1863d":"js/ScriptResource--80242ea40f099df7.axd","https://mybusiness.chamber.sa/images/designversion3/Login/favicon.png":"images/designversion3/Login/favicon.png","https://mybusiness.chamber.sa/ScriptResource.axd?d=PfKZ24Gu2Ecj6eJVreMTEwvEcSGB0asGJLY5etvuimgRbvsi1H_YzMj7MeweR6ym7LOf1UrZH8b-lSiYlWDLI4IY6wriZKami8CLxAsIt9COzQRfwmZkAEZhix_9S4-fU3sqJQCiDYqpLKm0WGc2uUnleNc1&amp;t=ffffffff9fe38677":"js/ScriptResource--30a41baf8819a4c4.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=tZY1u2aj6D_LN7O7D9pG0riRLUkpQHjlH5KmeSRenoF-JBevNVpSIqwFn1ImQ2UDHx8eGea_N30qeQ2vDqxnbcO2CEiGvTDjq85BbWKqsAPUAMj-Pf-NJwOUhkD8drtfR20a5g2&amp;t=1f1d36c2":"js/ScriptResource--4e19c3af18372217.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=rIwmZAhqu7fyChEzayFYiclY6jE382Xaa5fAVIrk2-5VOSKgmhnZP90t3BlJMwkP9yRa7lXauW-v-wC9zJvYr5ugtE7tRmkYF7tfrI483-j1ZNpdIh4gF4OliBJtokvwuW0VbA2&amp;t=1f1d36c2":"js/ScriptResource--34f33c54da5045f9.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=dnb9CdiFmdTlpWApI_yCSl3FGmCKY7VKMcEgBGb7XAUb6zhBt8p1EpS5JDdLKUrGYZYtuWzoP0rFxS6SQoXzgj3hzlnYxMsJ1sPaGLBbWhWN5Js-wzyg8LSoRME8Ne57l2pNWA2&amp;t=7d5986a":"js/ScriptResource--3fd71e307df68824.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=da7d0HAIgHKTSjbbL2nuP92F7BnkuaymcLuX2ncD1fCzMVP4bX6EHn9vl0bm1e558yVulttlq_3kBZl_d6FAcOtungFfta3OHPp31ImXC2TZDOZq0&amp;t=7d5986a":"js/ScriptResource--aba7209027b6f8f0.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=Ny7Q4p_vowGTysKvw-4U64BvSUDSmiCqmobgc2c_QV3ZkxUyOScf17OyhpNTIN_bTfKQ8dMXwH9pFPfWNPgYwCzM4OkGNOosq7mjY44Wg4XzYCzLWpD6UfVXmKlVvwXHsvM94A2&amp;t=7d5986a":"js/ScriptResource--c5ad48adc2dab4ea.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=KUHIwhbn3L487xT1Zn_spf9sIppXx5CmWPvx9f0tFmuFdlBvJn3M-E9kHfLy89xxEUQJTHmyJaozgcoHas2ZnogL30x6cBXu8wwsLt3vOGf_OKv0LUig1kOssO6vZvW-sk_kPg2&amp;t=7d5986a":"js/ScriptResource--4c7cdea46b00f129.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=pNMTo2YHIl-3PgdB21oUqqQDttVGUGwKoVUigZpg_UUzjYgQ-nUcrFyTdZ3R42mHSC3si4ixyk0Y9v86MRog0wGvIHv4hdRF1XTEj78EbA1zEo5K0C0onADyS2yV17M5MbT4kw2&amp;t=7d5986a":"js/ScriptResource--7513767bd78d1198.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=la53eK5hvzNNCXie4qwcEChCigws5tWQD7CTRf08BTWDW9UgsbY3ARW2WPexF6kUyZdcVGIJNkqgAj2aO7N6Ii3FZ4FhAJKQwkDOS6sVGwO8jwfJWnO6np7EKFvxgJ8DbZLrLQ2&amp;t=7d5986a":"js/ScriptResource--b5d816441f6a25d1.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=gZvfg2o3PPTCVipPXViHaEdkacCfeIyFStn8-1C62_YFZYdHDc4j2-3IdOI6yuy5yOkk3w_cwpxXTbKMdPvJE2oTMLwhlQaE3ru0fLMuJeNvSH12J493l4iRIVQMoT9nEILbzg2&amp;t=7d5986a":"js/ScriptResource--f15ad56a5409964f.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=PJWq-uhsoa2l1NjGmaF1-2uAbYX6u8OOMQfTyDr6nyIMMYbO-lr1rCNzkgQUePiWGUJn0WiuVOx6k8nWG_pr7bT9RTBz4rLTEXr71dTdPCxOWJ6_G4YDj_O0jFvofhHx2A29kg2&amp;t=7d5986a":"js/ScriptResource--87f7d0b7d8abbc5f.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=yyL8q7nKLIB_cTz_UadtWGYYuegrvzzlXTciGlN5dUKpn6g4OHnx_MEN32-v2r1eDSGQ4iDADbonn3t68BZh-3mKctd0AOws3JCcT-X8BS0JUuZqN5cV6NzSu_ED-BOT7M6puw2&amp;t=7d5986a":"js/ScriptResource--d519f202cc1f7197.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=GrMIee2_ZvSJ770B2M8fR-zCwqj6EXt-Op9tlbb5JuO7Ax75NkBzWwOR7Tj_RIk_0V0sq7xZyJsgz_BGV_ivsQso2BLd7fmcjkk5KKg0qwWrnqtbWyfDUIOdABevc7PBdUU9Fg2&amp;t=7d5986a":"js/ScriptResource--8121a3242b4e3d58.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=i5G8YKEXaqaOzKhibySv1vCOnElrRAsaxCVr5blfgIP38lG5iSxIkwswV6khMRiVex4ZTNaAOXRF9htieDaWEAyTdnMBbZnFK0jIlrlSEyDU98pCtctrEO-690lac8Ae0OwRrA2&amp;t=7d5986a":"js/ScriptResource--9aad534e5f4dbd4d.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=7umfi1XA9EN7K0_aOS3MIPQofxjt2sTblMNYlx_BqAdapT53ZBK8tEyC8AZJosNxjAqcBOu4ynOime7gsH_GWSsRJVqRPgdt5tJM7LX3396yWp1Y0&amp;t=7d5986a":"js/ScriptResource--c8e4a6beb294f3c0.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=288mMZ8xFN5ZQHw1gOpWx8vIMkYEe14vGgOYNY-EKTtKH0ssnV2wM2-GU_LMLHXvPCXDSno5OvBUhodFbGo5XQDDKa1OWJv8lRk7n8f7J5Ss6o4L-9t67jreAMJfUlKiiJfX6w2&amp;t=7d5986a":"js/ScriptResource--17a6a28f15c66e7d.axd","https://mybusiness.chamber.sa/ScriptResource.axd?d=fEwVQ7kOsgqJXjsCYunjU7ZdfTF7YVj3iqoZjabhvVhNCT1Zw_AOLrFzO7ZojpEIMkDElA6ewofPFMar3jFftuhihrqiXwnhvCctrzJGrpkDSzis65mp5uDnGMBDoEgIhKEsCg2&amp;t=7d5986a":"js/ScriptResource--2c1214ede5ae1848.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=529c69f2-4241-43e1-a000-a0bf9bb857a8":"assets/Telerik.Web.UI.WebResource--69dc54ffdbf9d2c3.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=a2262ca8-fdc4-44bd-9e46-c10f0fc7d758":"assets/Telerik.Web.UI.WebResource--6e0a264feba5fd28.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=68585f4b-b603-4932-a98a-de1879418d5c":"assets/Telerik.Web.UI.WebResource--59ebbd3eaa07ef4b.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=beea6c3c-3e9f-47c3-98bc-8939087a639a":"assets/Telerik.Web.UI.WebResource--d892e31fb6cc214a.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=9bf394dc-8b12-4767-b11b-5a04f8d9debf":"assets/Telerik.Web.UI.WebResource--3425f753fe5f06ee.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=566f0936-727e-4c7b-b802-c90eb353072d":"assets/Telerik.Web.UI.WebResource--42584012f0d9d118.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=9534cd20-f765-4a2b-b0a8-0b3f96cd21ff":"assets/Telerik.Web.UI.WebResource--29791172d49fa5ce.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=73e99751-eb2c-4b23-9b17-8f03ae47d97d":"assets/Telerik.Web.UI.WebResource--641b8bebe5c5c002.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=388441fd-bedd-4075-a224-d77216335f58":"assets/Telerik.Web.UI.WebResource--e9f2e5e5fe080a62.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=576e8fb0-fea6-4db1-9186-baa605a8d0bb":"assets/Telerik.Web.UI.WebResource--a647e4143361960a.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=4ff448e1-fbde-4639-9cda-5590d69fc5fe":"assets/Telerik.Web.UI.WebResource--11c448c70b17ba9f.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=32464353-559d-4038-85c6-164dc80362ab":"assets/Telerik.Web.UI.WebResource--9dac7f1c07a01cb1.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=eb7bf927-c9b7-4915-90e8-4cef24f34e32":"assets/Telerik.Web.UI.WebResource--7c2b33e353cac451.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=ee7db213-6130-4d06-8ff1-32bcea0e3bf8":"assets/Telerik.Web.UI.WebResource--5e6fb99a526b3ffd.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=2cc4b227-4823-4d02-98a2-12eb4d25cf4c":"assets/Telerik.Web.UI.WebResource--ef3546996ef475e1.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=39aa295b-45af-4435-9c77-25f269b6ceb8":"assets/Telerik.Web.UI.WebResource--c1c83de00233e13b.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=f99dac03-dde8-48d2-a51b-8dc1eb2690de":"assets/Telerik.Web.UI.WebResource--161f51036280246b.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=e62c82f9-5107-4213-a150-e91aadc2d423":"assets/Telerik.Web.UI.WebResource--ef550254e3ff9fa4.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=bdb5ea72-29f0-43ae-bd7c-170b49bedd15":"assets/Telerik.Web.UI.WebResource--cc7d38f62ae3f813.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=e85d1555-86ca-4456-bf5a-56274de687fc":"assets/Telerik.Web.UI.WebResource--533ced13b04f1631.axd","https://mybusiness.chamber.sa/Telerik.Web.UI.WebResource.axd?type=rca&amp;isc=false&amp;guid=e22b4729-d569-40ee-a11d-4a6f75f3e430":"assets/Telerik.Web.UI.WebResource--1afd8fe0a3ff759e.axd","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/GEFlow-regular.ttf":"fonts/Ar/DesignVersion3/GEFlow-regular.ttf","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/GEFlow-regular.woff":"fonts/Ar/DesignVersion3/GEFlow-regular.woff","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/GEFlow-regular.svg":"images/fonts/Ar/DesignVersion3/GEFlow-regular.svg","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/GEFlow-Bold.otf":"fonts/Ar/DesignVersion3/GEFlow-Bold.otf","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/GEFlow-Bold.ttf":"fonts/Ar/DesignVersion3/GEFlow-Bold.ttf","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/GEFlow-Bold.woff":"fonts/Ar/DesignVersion3/GEFlow-Bold.woff","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/GEFlow-Bold.svg":"images/fonts/Ar/DesignVersion3/GEFlow-Bold.svg","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.eot":"fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.eot","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.eot?":"fonts/Ar/DesignVersion3/DINNextLTArabic-Regular--66041b0b62d59b1e.eot","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.svg":"images/fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.svg","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.ttf":"fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.ttf","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.eot?":"fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.eot","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.svg":"images/fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.svg","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.ttf":"fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.ttf","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/fontello.eot?53989230":"fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.eot","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/fontello.woff?53989230":"fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.woff","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/fontello.ttf?53989230":"fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.ttf","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/fontello.svg?53989230":"images/fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.svg","https://mybusiness.chamber.sa/images/designVersion3/Login/menu.png":"images/designVersion3/Login/menu.png","https://mybusiness.chamber.sa/images/designVersion3/Login/list-bg.png":"images/designVersion3/Login/list-bg.png","https://mybusiness.chamber.sa/images/designVersion3/Login/model-bg.png":"images/designVersion3/Login/model-bg.png","https://mybusiness.chamber.sa/images/designVersion3/Login/right-arrow.png":"images/designVersion3/Login/right-arrow.png","https://mybusiness.chamber.sa/Images/refresh-icon.png":"images/refresh-icon.png","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.eot":"fonts/Ar/DesignVersion3/glyphicons-halflings-regular.eot","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.eot?":"fonts/Ar/DesignVersion3/glyphicons-halflings-regular--505a1295cc599703.eot","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.woff":"fonts/Ar/DesignVersion3/glyphicons-halflings-regular.woff","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.ttf":"fonts/Ar/DesignVersion3/glyphicons-halflings-regular.ttf","https://mybusiness.chamber.sa/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.svg":"images/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.svg"};
+  var captchaPaths = {};
+  var basenameMatches = {"robots.txt":"assets/robots.txt","internal.css":"css/styles/DesignVersion3/Login/internal.css","config.css":"css/styles/DesignVersion3/Login/config.css","common.js":"js/Scripts/DesignVersion3/Login/common.js","ScriptResource.axd":null,"config.min.js":"js/Scripts/DesignVersion3/Login/config.min.js","secondary-logo.png":"images/designversion3/Login/secondary-logo.png","primary-logo.png":"images/designversion3/Login/primary-logo.png","WebResource.axd":null,"profile-icon.png":"images/designversion3/Login/profile-icon.png","jquery.js":"js/Scripts/DesignVersion3/Login/jquery.js","gIcon.svg":"images/designversion3/login/gIcon.svg","ipIcon.svg":"images/designversion3/login/ipIcon.svg","login.png":"images/designVersion3/Login/login.png","header-bg.jpg":"images/designVersion3/Login/header-bg.jpg","fontello.woff2":"fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.woff2","GEFlow-regular.otf":"fonts/Ar/DesignVersion3/GEFlow-regular.otf","js":"js/gtag/js--1aee01882580bd8c.js","DINNextLTArabic-Regular.woff":"fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.woff","DINNextLTArabic-Bold.woff":"fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.woff","collect":null,"ScanQR.aspx":"-TrID-29004459_1233840-/index.html","Telerik.Web.UI.WebResource.axd":null,"icon99.png":"images/designversion3/login/icon99.png","note.png":"images/designversion3/login/note.png","autoplay.js":"js/Scripts/DesignVersion3/Login/autoplay.js","icon7.png":"images/designversion3/login/icon7.png","username.png":"images/designVersion3/Login/username.png","film.png":"images/designversion3/login/film.png","password.png":"images/designVersion3/Login/password.png","tomoh_final_test.png":"images/DesignVersion3/tomoh_final_test.png","monshaat_fit_width.png":"images/DesignVersion3/monshaat_fit_width.png","%D8%A8%D9%88%D8%B3%D8%AA%20%D8%AF%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D8%A7%D8%B9%D9%85%D8%A7%D9%84.jpeg":"images/PublishingImages/بوست_دليل_الاعمال.jpeg","glyphicons-halflings-regular.woff2":"fonts/Ar/DesignVersion3/glyphicons-halflings-regular.woff2","Login.aspx":null,"RegistrationConditions.aspx":null,"index.aspx":"index.aspx.html","bootstrap.min.js":"js/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js","jquery.min.js":"js/ajax/libs/jquery/3.7.1/jquery.min.js","sanadservice.aspx":"verify/sanadservice.aspx.html","getUsername.aspx":"getUsername.aspx.html","pr.aspx":"pr.aspx.html","ChangeMobileNumber.aspx":"ChangeMobileNumber.aspx.html","jadeer_natural_new.png":"images/DesignVersion3/jadeer_natural_new.png","mazaya_natural_new.png":"images/DesignVersion3/mazaya_natural_new.png","externalservices.aspx":"extservices/externalservices.aspx.html","getusername.aspx":"getusername.aspx.html","html5shiv.min.js":"js/html5shiv/3.7.2/html5shiv.min.js","respond.min.js":"js/respond/1.4.2/respond.min.js","favicon.png":"images/designversion3/Login/favicon.png","GEFlow-regular.ttf":"fonts/Ar/DesignVersion3/GEFlow-regular.ttf","GEFlow-regular.woff":"fonts/Ar/DesignVersion3/GEFlow-regular.woff","GEFlow-regular.svg":"images/fonts/Ar/DesignVersion3/GEFlow-regular.svg","GEFlow-Bold.otf":"fonts/Ar/DesignVersion3/GEFlow-Bold.otf","GEFlow-Bold.ttf":"fonts/Ar/DesignVersion3/GEFlow-Bold.ttf","GEFlow-Bold.woff":"fonts/Ar/DesignVersion3/GEFlow-Bold.woff","GEFlow-Bold.svg":"images/fonts/Ar/DesignVersion3/GEFlow-Bold.svg","DINNextLTArabic-Regular.eot":null,"DINNextLTArabic-Regular.svg":"images/fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.svg","DINNextLTArabic-Regular.ttf":"fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.ttf","DINNextLTArabic-Bold.eot":"fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.eot","DINNextLTArabic-Bold.svg":"images/fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.svg","DINNextLTArabic-Bold.ttf":"fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.ttf","fontello.eot":"fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.eot","fontello.woff":"fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.woff","fontello.ttf":"fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.ttf","fontello.svg":"images/fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.svg","menu.png":"images/designVersion3/Login/menu.png","list-bg.png":"images/designVersion3/Login/list-bg.png","model-bg.png":"images/designVersion3/Login/model-bg.png","right-arrow.png":"images/designVersion3/Login/right-arrow.png","refresh-icon.png":"images/refresh-icon.png","glyphicons-halflings-regular.eot":null,"glyphicons-halflings-regular.woff":"fonts/Ar/DesignVersion3/glyphicons-halflings-regular.woff","glyphicons-halflings-regular.ttf":"fonts/Ar/DesignVersion3/glyphicons-halflings-regular.ttf","glyphicons-halflings-regular.svg":"images/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.svg"};
+  var imageStemMatches = {"secondary-logo":"images/designversion3/Login/secondary-logo.png","primary-logo":"images/designversion3/Login/primary-logo.png","profile-icon":"images/designversion3/Login/profile-icon.png","gicon":"images/designversion3/login/gIcon.svg","ipicon":"images/designversion3/login/ipIcon.svg","login":"images/designVersion3/Login/login.png","header-bg":"images/designVersion3/Login/header-bg.jpg","icon99":"images/designversion3/login/icon99.png","note":"images/designversion3/login/note.png","icon7":"images/designversion3/login/icon7.png","username":"images/designVersion3/Login/username.png","film":"images/designversion3/login/film.png","password":"images/designVersion3/Login/password.png","tomoh_final_test":"images/DesignVersion3/tomoh_final_test.png","monshaat_fit_width":"images/DesignVersion3/monshaat_fit_width.png","%d8%a8%d9%88%d8%b3%d8%aa%20%d8%af%d9%84%d9%8a%d9%84%20%d8%a7%d9%84%d8%a7%d8%b9%d9%85%d8%a7%d9%84":"images/PublishingImages/بوست_دليل_الاعمال.jpeg","jadeer_natural_new":"images/DesignVersion3/jadeer_natural_new.png","mazaya_natural_new":"images/DesignVersion3/mazaya_natural_new.png","favicon":"images/designversion3/Login/favicon.png","geflow-regular":"images/fonts/Ar/DesignVersion3/GEFlow-regular.svg","geflow-bold":"images/fonts/Ar/DesignVersion3/GEFlow-Bold.svg","dinnextltarabic-regular":"images/fonts/Ar/DesignVersion3/DINNextLTArabic-Regular.svg","dinnextltarabic-bold":"images/fonts/Ar/DesignVersion3/DINNextLTArabic-Bold.svg","fontello":"images/fonts/Ar/DesignVersion3/fontello--b87f830a57c1212a.svg","menu":"images/designVersion3/Login/menu.png","list-bg":"images/designVersion3/Login/list-bg.png","model-bg":"images/designVersion3/Login/model-bg.png","right-arrow":"images/designVersion3/Login/right-arrow.png","refresh-icon":"images/refresh-icon.png","glyphicons-halflings-regular":"images/fonts/Ar/DesignVersion3/glyphicons-halflings-regular.svg"};
+  var sourcePageUrl = "https://mybusiness.chamber.sa/pr.aspx";
+
+  function normalizeAssetPath(value) {
+    if (typeof value !== 'string' || !value) return value;
+    var raw = value.trim();
+    try {
+      var original = new URL(raw, sourcePageUrl); original.hash = '';
+      var file = resources[original.href];
+      var queryless = original.origin + original.pathname;
+      if (!file && captchaPaths[queryless]) file = resources[queryless] || null;
+      if (!file) {
+        var name = original.pathname.split('/').pop();
+        file = name && basenameMatches[name] || null;
+      }
+      if (!file && /\.(?:png|jpe?g|gif|webp|avif|svg|ico)$/i.test(original.pathname)) {
+        var imageName = original.pathname.split('/').pop() || '';
+        var imageStem = imageName.replace(/\.[^.]*$/, '').toLowerCase();
+        file = imageStem && imageStemMatches[imageStem] || null;
+      }
+      if (file) return (window.__CLONED_DEPLOYMENT_BASE__ || '') + '/' + file;
+      if (captchaPaths[queryless]) return 'data:,';
+    } catch (_) {}
+    return value;
+  }
+
+  function rewriteCssUrlTokens(input, mapper) {
+  var text = String(input);
+  var output = '';
+  var copied = 0;
+  var index = 0;
+  var length = text.length;
+  function skipString(position, quote) {
+    position += 1;
+    while (position < length) {
+      if (text[position] === '\\') { position += 2; continue; }
+      if (text[position] === quote) return position + 1;
+      position += 1;
+    }
+    return length;
+  }
+  function skipComment(position) {
+    var end = text.indexOf('*/', position + 2);
+    return end < 0 ? length : end + 2;
+  }
+  while (index < length) {
+    var character = text[index];
+    if (character === '/' && text[index + 1] === '*') { index = skipComment(index); continue; }
+    if (character === '"' || character === "'") { index = skipString(index, character); continue; }
+    var boundaryBefore = index === 0 || !/[a-z0-9_-]/i.test(text[index - 1]);
+    if (!boundaryBefore || text.slice(index, index + 3).toLowerCase() !== 'url') { index += 1; continue; }
+    var cursor = index + 3;
+    while (cursor < length && /\s/.test(text[cursor])) cursor += 1;
+    if (text[cursor] !== '(') { index += 3; continue; }
+    cursor += 1;
+    while (cursor < length && /\s/.test(text[cursor])) cursor += 1;
+    var valueStart = cursor;
+    var valueEnd;
+    var close;
+    var quote = text[cursor] === '"' || text[cursor] === "'" ? text[cursor] : '';
+    if (quote) {
+      valueStart = cursor + 1;
+      cursor = skipString(cursor, quote);
+      if (cursor > length || text[cursor - 1] !== quote) { index = length; continue; }
+      valueEnd = cursor - 1;
+      while (cursor < length && /\s/.test(text[cursor])) cursor += 1;
+      if (text[cursor] !== ')') { index = cursor; continue; }
+      close = cursor;
+    } else {
+      var depth = 1;
+      while (cursor < length) {
+        character = text[cursor];
+        if (character === '\\') { cursor += 2; continue; }
+        if (character === '/' && text[cursor + 1] === '*') { cursor = skipComment(cursor); continue; }
+        if (character === '"' || character === "'") { cursor = skipString(cursor, character); continue; }
+        if (character === '(') depth += 1;
+        else if (character === ')' && --depth === 0) break;
+        cursor += 1;
+      }
+      if (cursor >= length) { index = length; continue; }
+      close = cursor;
+      valueEnd = close;
+      while (valueEnd > valueStart && /\s/.test(text[valueEnd - 1])) valueEnd -= 1;
+    }
+    var original = text.slice(valueStart, valueEnd);
+    var replacement = mapper(original, {
+      start: index,
+      end: close + 1,
+      valueStart: valueStart,
+      valueEnd: valueEnd,
+      quote: quote,
+      token: text.slice(index, close + 1)
+    });
+    if (typeof replacement === 'string' && replacement !== original) {
+      output += text.slice(copied, valueStart) + replacement;
+      copied = valueEnd;
+    }
+    index = close + 1;
+  }
+  return copied ? output + text.slice(copied) : text;
+}
+  function rewriteCssImportTokens(input, mapper) {
+  var text = String(input);
+  var output = '';
+  var copied = 0;
+  var index = 0;
+  var length = text.length;
+  function skipString(position, quote) {
+    position += 1;
+    while (position < length) {
+      if (text[position] === '\\') { position += 2; continue; }
+      if (text[position] === quote) return position + 1;
+      position += 1;
+    }
+    return length;
+  }
+  while (index < length) {
+    if (text[index] === '/' && text[index + 1] === '*') {
+      var commentEnd = text.indexOf('*/', index + 2);
+      index = commentEnd < 0 ? length : commentEnd + 2;
+      continue;
+    }
+    if (text[index] === '"' || text[index] === "'") { index = skipString(index, text[index]); continue; }
+    if (text.slice(index, index + 7).toLowerCase() !== '@import' || /[a-z0-9_-]/i.test(text[index + 7] || '')) { index += 1; continue; }
+    var cursor = index + 7;
+    while (cursor < length && /\s/.test(text[cursor])) cursor += 1;
+    var quote = text[cursor];
+    if (quote !== '"' && quote !== "'") { index = cursor; continue; }
+    var valueStart = cursor + 1;
+    cursor = skipString(cursor, quote);
+    if (cursor > length || text[cursor - 1] !== quote) { index = length; continue; }
+    var valueEnd = cursor - 1;
+    var original = text.slice(valueStart, valueEnd);
+    var replacement = mapper(original, { start: index, valueStart: valueStart, valueEnd: valueEnd, quote: quote });
+    if (typeof replacement === 'string' && replacement !== original) {
+      output += text.slice(copied, valueStart) + replacement;
+      copied = valueEnd;
+    }
+    index = cursor;
+  }
+  return copied ? output + text.slice(copied) : text;
+}
+
+  function resolveCss(value) {
+    if (typeof value !== 'string') return value;
+    function rewrite(raw) {
+      var resolved = normalizeAssetPath(raw.trim());
+      return resolved === raw.trim() ? raw : resolved;
+    }
+    return rewriteCssImportTokens(rewriteCssUrlTokens(value, rewrite), rewrite);
+  }
+
+  function resolveMarkup(value) {
+    if (typeof value !== 'string' || !value) return value;
+    var output = value.replace(/\b(src|href|poster|data)=(["'])(.*?)\2/gi, function(match, attribute, quote, raw) {
+      var resolved = normalizeAssetPath(raw);
+      return attribute + '=' + quote + resolved + quote;
+    });
+    output = output.replace(/\b(srcset|imagesrcset)=(["'])(.*?)\2/gi, function(match, attribute, quote, raw) {
+      var candidates = raw.split(',').map(function(candidate) {
+        var parts = candidate.trim().split(/\s+/);
+        parts[0] = normalizeAssetPath(parts[0]);
+        return parts.join(' ');
+      });
+      return attribute + '=' + quote + candidates.join(', ') + quote;
+    });
+    return output.replace(/\bstyle=(["'])(.*?)\1/gi, function(match, quote, raw) {
+      return 'style=' + quote + resolveCss(raw) + quote;
+    });
+  }
+
+  [['innerHTML', 'set'], ['outerHTML', 'set']].forEach(function(entry) {
+    var descriptor = Object.getOwnPropertyDescriptor(Element.prototype, entry[0]);
+    if (!descriptor || !descriptor.set || !descriptor.get) return;
+    Object.defineProperty(Element.prototype, entry[0], {
+      configurable: true,
+      enumerable: descriptor.enumerable,
+      get: descriptor.get,
+      set: function(value) { return descriptor.set.call(this, resolveMarkup(value)); }
+    });
+  });
+  var insertAdjacentHTML = Element.prototype.insertAdjacentHTML;
+  if (insertAdjacentHTML) Element.prototype.insertAdjacentHTML = function(position, value) {
+    return insertAdjacentHTML.call(this, position, resolveMarkup(value));
+  };
+
+  var setAttribute = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function (name, value) {
+    var attribute = String(name).toLowerCase();
+    if (attribute === 'src' || attribute === 'href' || attribute === 'poster' || attribute === 'data') value = normalizeAssetPath(value);
+    if (attribute === 'style') value = resolveCss(value);
+    return setAttribute.call(this, name, value);
+  };
+
+  [['HTMLImageElement', 'src'], ['HTMLScriptElement', 'src'], ['HTMLLinkElement', 'href'], ['HTMLSourceElement', 'src'], ['HTMLVideoElement', 'poster'], ['HTMLAudioElement', 'src']].forEach(function (entry) {
+    var Type = window[entry[0]];
+    if (!Type) return;
+    var descriptor = Object.getOwnPropertyDescriptor(Type.prototype, entry[1]);
+    if (!descriptor || !descriptor.set || !descriptor.get) return;
+    Object.defineProperty(Type.prototype, entry[1], {
+      configurable: true,
+      enumerable: descriptor.enumerable,
+      get: descriptor.get,
+      set: function (value) { return descriptor.set.call(this, normalizeAssetPath(value)); }
+    });
+  });
+
+  var originalFetch = window.fetch && window.fetch.bind(window);
+  if (originalFetch) window.fetch = function (input, init) {
+    if (typeof input === 'string') input = normalizeAssetPath(input);
+    else if (input && input.url) input = new Request(normalizeAssetPath(input.url), input);
+    return originalFetch(input, init);
+  };
+
+  var open = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function (method, url) {
+    arguments[1] = normalizeAssetPath(url);
+    return open.apply(this, arguments);
+  };
+
+  var setProperty = CSSStyleDeclaration.prototype.setProperty;
+  CSSStyleDeclaration.prototype.setProperty = function (name, value, priority) {
+    return setProperty.call(this, name, resolveCss(value), priority);
+  };
+})();
+</script><script>
+window.__CLONED_API_CACHE__ = [];
+(function(){
+  var cache = window.__CLONED_API_CACHE__ || [];
+  var sourcePageUrl = "https://mybusiness.chamber.sa/pr.aspx";
+  var originalFetch = window.fetch ? window.fetch.bind(window) : null;
+  function identity(url, base) {
+    try {
+      var parsed = new URL(String(url), base || location.href);
+      parsed.hash = '';
+      return parsed.pathname + parsed.search;
+    } catch (_) { return ''; }
+  }
+  function requestIdentities(url) {
+    var identities = [];
+    function add(value) { if (value && identities.indexOf(value) === -1) identities.push(value); }
+    add(identity(url, sourcePageUrl || location.href));
+    var local = identity(url, location.href);
+    add(local);
+    try {
+      var parsed = new URL(String(url), location.href);
+      var deployment = (window.__CLONED_DEPLOYMENT_BASE__ || '').replace(/\/+$/, '');
+      if (deployment && (parsed.pathname === deployment || parsed.pathname.indexOf(deployment + '/') === 0)) {
+        add((parsed.pathname.slice(deployment.length) || '/') + parsed.search);
+      }
+    } catch (_) {}
+    return identities;
+  }
+  function itemIdentities(item) {
+    var identities = [];
+    function add(value) { if (value && identities.indexOf(value) === -1) identities.push(value); }
+    add(identity(item.url, sourcePageUrl || location.href));
+    if (item.pathname) {
+      var search = '';
+      try { search = new URL(item.url, sourcePageUrl || location.href).search; } catch (_) {}
+      add(item.pathname + search);
+    }
+    if (item.file) {
+      var deployment = (window.__CLONED_DEPLOYMENT_BASE__ || '').replace(/\/+$/, '');
+      add((deployment || '') + '/' + String(item.file).replace(/^\/+/, ''));
+    }
+    return identities;
+  }
+  function find(url, method) {
+    var requestMethod = String(method || 'GET').toUpperCase();
+    var requested = requestIdentities(url);
+    var exact = cache.find(function(item) {
+      if (String(item.method || 'GET').toUpperCase() !== requestMethod) return false;
+      var captured = itemIdentities(item);
+      return requested.some(function(value) { return captured.indexOf(value) !== -1; });
+    });
+    if (exact) return exact;
+    var requestedPaths = requested.map(function(value) { try { return new URL(value, location.origin).pathname; } catch (_) { return ''; } });
+    var fallbacks = cache.filter(function(item) {
+      return item.staticFallback && String(item.method || 'GET').toUpperCase() === requestMethod && requestedPaths.indexOf(item.pathname) !== -1;
+    });
+    return fallbacks.length === 1 ? fallbacks[0] : undefined;
+  }
+  window.__CLONED_FIND_API__ = find;
+  function replayPayload(item) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) throw new TypeError('Invalid replay entry');
+    var bytes = item.encoding === 'base64'
+      ? Uint8Array.from(atob(String(item.body == null ? '' : item.body)), function(c) { return c.charCodeAt(0); })
+      : new TextEncoder().encode(String(item.body == null ? '' : item.body));
+    var charset = 'utf-8';
+    var match = String(item.contentType || item.headers && item.headers['content-type'] || '').match(/charset\s*=\s*["']?([^;"'\s]+)/i);
+    if (match) charset = match[1];
+    var text;
+    if (item.encoding !== 'base64') text = String(item.body == null ? '' : item.body);
+    else {
+      try { text = new TextDecoder(charset).decode(bytes); }
+      catch (_) { text = new TextDecoder('utf-8').decode(bytes); }
+    }
+    var headers = Object.assign({}, item.headers || {});
+    var contentTypeName = Object.keys(headers).find(function(name) { return name.toLowerCase() === 'content-type'; });
+    if (!contentTypeName && item.contentType) {
+      headers['content-type'] = item.contentType;
+      contentTypeName = 'content-type';
+    }
+    return {
+      bytes: bytes,
+      text: text,
+      headers: headers,
+      status: typeof item.status === 'number' ? item.status : 200,
+      statusText: item.statusText == null ? '' : String(item.statusText),
+      contentType: item.contentType || contentTypeName && headers[contentTypeName] || ''
+    };
+  }
+  function makeResponse(item) {
+    var payload = replayPayload(item);
+    return new Response(payload.bytes, { status: payload.status, statusText: payload.statusText, headers: payload.headers });
+  }
+  function responseHeaders(payload) {
+    return Object.keys(payload.headers).map(function(name) { return name + ': ' + payload.headers[name]; }).join('\r\n');
+  }
+  function responseValue(payload, responseType) {
+    var type = String(responseType || '').toLowerCase();
+    if (!type || type === 'text') return payload.text;
+    if (type === 'json') { try { return JSON.parse(payload.text); } catch (_) { return null; } }
+    if (type === 'arraybuffer') return payload.bytes.buffer.slice(payload.bytes.byteOffset, payload.bytes.byteOffset + payload.bytes.byteLength);
+    if (type === 'blob') return new Blob([payload.bytes], { type: payload.contentType });
+    if (type === 'document') {
+      try { return new DOMParser().parseFromString(payload.text, /xml/i.test(payload.contentType) ? 'application/xml' : 'text/html'); }
+      catch (_) { return null; }
+    }
+    return payload.text;
+  }
+  function bytesToBase64(bytes) {
+    var binary = '';
+    for (var offset = 0; offset < bytes.length; offset += 32768) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(offset, offset + 32768));
+    }
+    return btoa(binary);
+  }
+  function customDocumentUrl() {
+    var deployment = (window.__CLONED_DEPLOYMENT_BASE__ || '').replace(/\/+$/, '');
+    var url = new URL((deployment || '') + '/custom/document.pdf', location.origin);
+    url.searchParams.set('__clone_pdf', Date.now().toString());
+    return url.href;
+  }
+  function markViewDocumentReplayed() {
+    window.__CLONED_VIEW_DOCUMENT_REPLAYED__ = true;
+    window.dispatchEvent(new Event('cloned:view-document-replayed'));
+  }
+  function resolveItem(item) {
+    if (!originalFetch || !item || item.pathname !== '/backend/api/MyDocuments/ViewDocumentV2') return Promise.resolve(item);
+    return originalFetch(customDocumentUrl(), { cache: 'no-store', headers: { 'cache-control': 'no-cache' } }).then(function(response) {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.arrayBuffer();
+    }).then(function(buffer) {
+      var bytes = new Uint8Array(buffer);
+      if (bytes.length < 5 || String.fromCharCode.apply(null, bytes.subarray(0, 5)) !== '%PDF-') throw new Error('invalid PDF header');
+      var payload = JSON.parse(item.body);
+      var original = payload.data && payload.data.contentList || [];
+      var chunkSize = original.length && original[0].length > 3 ? original[0].length - 3 : 95000;
+      var base64 = bytesToBase64(bytes), originalBase64 = original.slice().sort(function(a, b) { return +a.slice(0, 3) - +b.slice(0, 3); }).map(function(part) { return part.slice(3); }).join('');
+      if (base64 === originalBase64) { markViewDocumentReplayed(); return item; }
+      var chunks = [];
+      for (var offset = 0, index = 0; offset < base64.length; offset += chunkSize, index++) {
+        chunks.push(String(index).padStart(3, '0') + base64.slice(offset, offset + chunkSize));
+      }
+      payload.data.contentList = chunks;
+      markViewDocumentReplayed();
+      return Object.assign({}, item, { body: JSON.stringify(payload), encoding: 'utf8' });
+    }).catch(function(error) {
+      console.warn('Custom document unavailable; using captured PDF:', error.message || error);
+      markViewDocumentReplayed();
+      return item;
+    });
+  }
+  if (originalFetch) {
+    window.fetch = function(input, init) {
+      var url = typeof input === 'string' ? input : input && input.url;
+      var method = init && init.method || input && input.method || 'GET';
+      var item = find(url, method);
+      return item ? resolveItem(item).then(makeResponse) : originalFetch(input, init);
+    };
+  }
+  var NativeXHR = window.XMLHttpRequest;
+  if (NativeXHR) {
+    window.XMLHttpRequest = function() {
+      var xhr = new NativeXHR();
+      var lastUrl = '';
+      var lastMethod = 'GET';
+      var open = xhr.open.bind(xhr);
+      var send = xhr.send.bind(xhr);
+      xhr.open = function(method, url) {
+        lastMethod = method;
+        lastUrl = url;
+        return open.apply(xhr, arguments);
+      };
+      xhr.send = function(body) {
+        var item = find(lastUrl, lastMethod);
+        if (!item) return send.call(xhr, body);
+        resolveItem(item).then(function(resolvedItem) {
+          var payload = replayPayload(resolvedItem);
+          var responseText = payload.text;
+          var response = responseValue(payload, xhr.responseType);
+          var responseUrl;
+          try { responseUrl = new URL(String(lastUrl), location.href).href; } catch (_) { responseUrl = String(lastUrl || ''); }
+          var headerText = responseHeaders(payload);
+          Object.defineProperties(xhr, {
+            readyState: { get: function() { return 4; } }, status: { get: function() { return payload.status; } },
+            statusText: { get: function() { return payload.statusText; } },
+            responseText: { get: function() {
+              if (xhr.responseType && xhr.responseType !== 'text') throw new DOMException('The object is in an invalid state.', 'InvalidStateError');
+              return responseText;
+            } },
+            response: { get: function() { return response; } }, responseURL: { get: function() { return responseUrl; } }
+          });
+          xhr.getAllResponseHeaders = function() { return headerText; };
+          xhr.getResponseHeader = function(name) {
+            var headers = payload.headers;
+            var target = String(name).toLowerCase();
+            var key = Object.keys(headers).find(function(header) { return header.toLowerCase() === target; });
+            return key ? String(headers[key]) : null;
+          };
+          queueMicrotask(function() {
+            xhr.dispatchEvent(new Event('readystatechange'));
+            xhr.dispatchEvent(new ProgressEvent('load', { lengthComputable: true, loaded: payload.bytes.byteLength, total: payload.bytes.byteLength }));
+            xhr.dispatchEvent(new ProgressEvent('loadend', { lengthComputable: true, loaded: payload.bytes.byteLength, total: payload.bytes.byteLength }));
+          });
+        });
+      };
+      return xhr;
+    };
+    window.XMLHttpRequest.prototype = NativeXHR.prototype;
+    Object.assign(window.XMLHttpRequest, NativeXHR);
+  }
+})();
+</script><script data-cloned-rendered-controls>(function(){
+if(window.__CLONED_RENDERED_CONTROLS__)return;
+var descriptors=[{"id":"control-3f728f3a1611c63a","category":"PROTECTED_OR_UNSUPPORTED","destination":"","target":"","operation":null,"runtimePassthrough":false},{"id":"control-926a5178a2e60895","category":"CAPTURED_LOCAL_NAVIGATION","destination":"https://mybusiness.chamber.sa/Login.aspx","target":"","operation":{"kind":"native-captured-route"},"runtimePassthrough":false},{"id":"control-46507f85d011a4e4","category":"ORIGINAL_LINK","destination":"http://chamber.sa/","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-a5ef31837bd86058","category":"LOCAL_DOM_ACTION","destination":"","target":"","operation":{"kind":"toggle-dropdown","targetId":""},"runtimePassthrough":false},{"id":"control-e3faa81f0a8d2c8e","category":"CAPTURED_LOCAL_NAVIGATION","destination":"https://mybusiness.chamber.sa/RegistrationConditions.aspx","target":"","operation":{"kind":"native-captured-route"},"runtimePassthrough":false},{"id":"control-39183b6995b7be09","category":"ORIGINAL_LINK","destination":"https://chamber.sa/Documents/2026/MyBusinessUserGuide.pdf","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-d9b8db56931ede82","category":"ORIGINAL_LINK","destination":"https://chamber.sa/EServices/Documents/MY%20Business%20Portal.pdf","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-e94599f6b6c434d9","category":"LOCAL_DOM_ACTION","destination":"","target":"","operation":{"kind":"hide-modal"},"runtimePassthrough":false},{"id":"control-fa9a9d76acf62f93","category":"ORIGINAL_LINK","destination":"https://chamber.sa/EServices/Documents/10122020.pdf","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-79f573676fb3e905","category":"ORIGINAL_LINK","destination":"https://chamber.sa/EServices/Documents/UserManualInfoEng.pdf","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-7897d09beb43e2d8","category":"LOCAL_DOM_ACTION","destination":"","target":"","operation":{"kind":"hide-modal"},"runtimePassthrough":false},{"id":"control-03c52c4677dbf592","category":"LOCAL_DOM_ACTION","destination":"","target":"","operation":{"kind":"switch-tab","targetId":"gate"},"runtimePassthrough":false},{"id":"control-b3e6d47203a7d5be","category":"PROTECTED_OR_UNSUPPORTED","destination":"","target":"","operation":null,"runtimePassthrough":false},{"id":"control-3ccaafac13d224db","category":"CAPTURED_LOCAL_NAVIGATION","destination":"https://mybusiness.chamber.sa/getusername.aspx","target":"","operation":{"kind":"native-captured-route"},"runtimePassthrough":false},{"id":"control-b61d6a7d3c4c8b3d","category":"CAPTURED_LOCAL_NAVIGATION","destination":"https://mybusiness.chamber.sa/Login.aspx","target":"","operation":{"kind":"native-captured-route"},"runtimePassthrough":false},{"id":"control-ff4e541decae3944","category":"PROTECTED_OR_UNSUPPORTED","destination":"","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-0019b8c08ba71284","category":"ORIGINAL_LINK","destination":"https://chamber.sa/EServices/Documents/12092020.pdf","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-d66674c22196e5e6","category":"PROTECTED_OR_UNSUPPORTED","destination":"","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-850b6ddfa2065227","category":"CAPTURED_LOCAL_NAVIGATION","destination":"https://mybusiness.chamber.sa/index.aspx","target":"","operation":{"kind":"native-captured-route"},"runtimePassthrough":false},{"id":"control-de9e7ea95cdd35dc","category":"CAPTURED_LOCAL_NAVIGATION","destination":"https://mybusiness.chamber.sa/verify/sanadservice.aspx","target":"","operation":{"kind":"native-captured-route"},"runtimePassthrough":false},{"id":"control-ad7af1a007902177","category":"ORIGINAL_LINK","destination":"http://www.chamber.sa/Home/ContactUs/FAQ/Pages/default.aspx","target":"","operation":null,"runtimePassthrough":false},{"id":"control-96e8cd8abbb4c80b","category":"ORIGINAL_LINK","destination":"http://www.chamber.sa/Home/ContactUs/ContactUs/Pages/default.aspx","target":"","operation":null,"runtimePassthrough":false},{"id":"control-ccb1f56faf04a376","category":"ORIGINAL_LINK","destination":"http://www.chamber.sa/Home/ContactUs/ContactUs/Pages/default.aspx","target":"","operation":null,"runtimePassthrough":false},{"id":"control-dc8297ef716e3bd9","category":"ORIGINAL_LINK","destination":"http://www.chamber.sa/Home/Branches/Pages/index.aspx","target":"","operation":null,"runtimePassthrough":false},{"id":"control-aeaabbc7bf7c0909","category":"ORIGINAL_LINK","destination":"http://www.chamber.sa/Home/ContactUs/Pages/RegisterInterests.aspx","target":"","operation":null,"runtimePassthrough":false},{"id":"control-84fcaa4610dbc8ae","category":"ORIGINAL_LINK","destination":"https://chamber.sa/SLA/Pages/default.aspx","target":"","operation":null,"runtimePassthrough":false},{"id":"control-8fce2ef3b3d47862","category":"ORIGINAL_LINK","destination":"https://twitter.com/RiyadhChamber","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-75f8f97f0ffebfab","category":"ORIGINAL_LINK","destination":"https://plus.google.com/+RiyadhChamber","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-017ceb82f9d80ffc","category":"ORIGINAL_LINK","destination":"https://www.facebook.com/RiyadhChamber?ref=hl","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-6dd7aeaeed7201ad","category":"ORIGINAL_LINK","destination":"https://www.linkedin.com/company/riyadhchamber/","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-56de75e257d4de93","category":"ORIGINAL_LINK","destination":"https://www.youtube.com/user/RiyadhChamber?feature=mhee","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-98dbfafe4a6d115e","category":"ORIGINAL_LINK","destination":"https://play.google.com/store/apps/details?id=com.gov.sa.newriyadhchamberandroid&amp;hl=en","target":"_blank","operation":null,"runtimePassthrough":false},{"id":"control-5341e15c08556229","category":"ORIGINAL_LINK","destination":"https://apps.apple.com/sa/app/%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A/id1530349012","target":"_blank","operation":null,"runtimePassthrough":false}];
+var byId={};descriptors.forEach(function(item){byId[item.id]=item});
+function descriptor(element){return element&&byId[element.getAttribute('data-cloned-control-id')]}
+function target(operation){if(!operation||!operation.targetId)return null;return document.getElementById(operation.targetId)}
+function visible(element,value){if(!element)return;element.hidden=!value;element.classList.toggle('show',value);element.setAttribute('aria-hidden',value?'false':'true')}
+function local(control,item){
+  var operation=item.operation||{},element=target(operation);
+  if(operation.kind==='show-modal'){visible(element,true);if(element)element.focus()}
+  else if(operation.kind==='hide-modal'){visible(control.closest('.modal,[role=dialog]'),false)}
+  else if(operation.kind==='hide-target')visible(element,false);
+  else if(operation.kind==='toggle-dropdown'){element=element||control.nextElementSibling;var expanded=control.getAttribute('aria-expanded')==='true';control.setAttribute('aria-expanded',expanded?'false':'true');visible(element,expanded?false:true)}
+  else if(operation.kind==='toggle-target'){var expanded=control.getAttribute('aria-expanded')==='true';control.setAttribute('aria-expanded',expanded?'false':'true');visible(element,expanded?false:true)}
+  else if(operation.kind==='switch-tab'){var container=control.closest('[role=tablist]')||control.parentElement;if(container)container.querySelectorAll('[role=tab],[data-toggle=tab],[data-bs-toggle=tab]').forEach(function(tab){var active=tab===control;tab.setAttribute('aria-selected',active?'true':'false');tab.setAttribute('tabindex',active?'0':'-1');tab.classList.toggle('active',active);var id=(tab.getAttribute('aria-controls')||(tab.getAttribute('href')||'').replace(/^#/,''));if(id)visible(document.getElementById(id),active)});if(element)visible(element,true)}
+  else if(operation.kind==='scroll-anchor'&&element){element.scrollIntoView();try{history.pushState(history.state,document.title,'#'+encodeURIComponent(operation.targetId))}catch(_){}if(element.focus)element.focus()}
+}
+function activate(event,control,item){
+  if(item.category==='CUSTOM_DOCUMENT_DOWNLOAD')return;
+  if(item.runtimePassthrough)return;
+  if(control.closest&&control.closest('form[data-cloned-journey-login-control]'))return;
+  if(item.category==='PROTECTED_OR_UNSUPPORTED'){event.preventDefault();event.stopPropagation();return}
+  if(item.category==='CAPTURED_LOCAL_NAVIGATION')return;
+  if(item.category==='LOCAL_DOM_ACTION'){if(item.operation&&(item.operation.kind==='native-captured-download'||item.operation.kind==='native-journey-transition'||item.operation.kind==='native-hash-navigation'||item.operation.kind==='native-captured-route'))return;event.preventDefault();event.stopPropagation();local(control,item);return}
+  var nativeLink=control.matches&&control.matches('a[href],area[href]');
+  if(nativeLink)return;
+  event.preventDefault();event.stopPropagation();
+  if(!item.destination)return;
+  if(item.target==='_blank')window.open(item.destination,'_blank','noopener,noreferrer');
+  else location.assign(item.destination);
+}
+document.addEventListener('click',function(event){var control=event.target&&event.target.closest&&event.target.closest('[data-cloned-control-id]');var item=descriptor(control);if(item)activate(event,control,item)},false);
+document.addEventListener('submit',function(event){var item=descriptor(event.target);if(item)activate(event,event.target,item)},false);
+window.__CLONED_RENDERED_CONTROLS__={descriptors:descriptors,installAttempts:1};
+})();</script><style>/* DOCUMENT_VIEWPORT_SCROLLBAR_FIX */
+html, body { height: 100% !important; }
+body { margin: 0 !important; }
+</style>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    
+
+    <script async="" src="js/gtag/js--1aee01882580bd8c.js"></script>
+    <script> window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date()); gtag('config', 'G-J484M255FL');
+    </script>
+
+    <meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>
+	بوابة أعمالي
+</title><link href="css/styles/DesignVersion3/Login/config.css" rel="stylesheet" type="text/css"><link href="css/styles/DesignVersion3/Login/internal.css" rel="stylesheet" type="text/css">
+    <!--[if lt IE 9]>
+            <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+            <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+            <script src="js/html5shiv/3.7.2/html5shiv.min.js"></script>
+            <script src="js/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    <!--[if IE]><!-->
+    <style>
+        </style>
+    <!--<![endif]-->
+    <script src="js/Scripts/DesignVersion3/Login/jquery.js" type="text/javascript"></script>
+    <script src="js/Scripts/DesignVersion3/Login/config.min.js" type="text/javascript"></script>
+    <script src="js/Scripts/DesignVersion3/Login/common.js" type="text/javascript"></script>
+    
+    <style>
+        #ctl00_MainContent_RadCaptcha3_CaptchaTextBox {
+            background: #f7f7f7 !important;
+        }
+        .localText
+        {
+            font-size:15pt !important;
+            
+        }
+        .forget {
+    
+            font-size: 15px !important;
+            float:right !important;
+        }
+    .forget1 {
+    
+            font-size: 15px !important;
+            float:left !important;
+        }    </style>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicons/selected-41222b1de08d02c1.png" data-cloned-selected-favicon="true"></head>
+
+<body class="loginBg">
+    <form method="post" action="pr.aspx.html" onsubmit="javascript:return WebForm_OnSubmit();" id="ctl01" data-cloned-control-id="control-3f728f3a1611c63a" data-cloned-control-category="PROTECTED_OR_UNSUPPORTED">
+<div class="aspNetHidden">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="">
+<input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKLTQ5NTUwNzAxMw9kFgJmD2QWAgIDD2QWDgIFD2QWAgIBD2QWAmYPZBYCAgUPZBYEAgUPEGRkFgFmZAILDxQrAAMPFgYeFUVuYWJsZUVtYmVkZGVkU2NyaXB0c2ceElJlc29sdmVkUmVuZGVyTW9kZQspc1RlbGVyaWsuV2ViLlVJLlJlbmRlck1vZGUsIFRlbGVyaWsuV2ViLlVJLCBWZXJzaW9uPTIwMjYuMS40MjEuNDYyLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPTEyMWZhZTc4MTY1YmEzZDQBHhdFbmFibGVBamF4U2tpblJlbmRlcmluZ2hkFgIeC0N1cnJlbnRHdWlkBSQ0ZmY0NDhlMS1mYmRlLTQ2MzktOWNkYS01NTkwZDY5ZmM1ZmUUKwADZGRkFgICAQ9kFgxmD2QWAmYPZBYIZg8PFgoeBkhlaWdodBsAAAAAAABJQAEAAAAeBVdpZHRoGwAAAAAAgGZAAQAAAB4IQ3NzQ2xhc3MFCmltYWdlQ2xhc3MeCEltYWdlVXJsBV1+L1RlbGVyaWsuV2ViLlVJLldlYlJlc291cmNlLmF4ZD90eXBlPXJjYSZpc2M9ZmFsc2UmZ3VpZD00ZmY0NDhlMS1mYmRlLTQ2MzktOWNkYS01NTkwZDY5ZmM1ZmUeBF8hU0ICggNkZAIBDw8WAh4EVGV4dAUSR2VuZXJhdGUgTmV3IEltYWdlFgIeBXRpdGxlBRJHZW5lcmF0ZSBOZXcgSW1hZ2VkAgIPFgQeCWlubmVyaHRtbAUOR2V0IEF1ZGlvIENvZGUeBGhyZWYFZX4vVGVsZXJpay5XZWIuVUkuV2ViUmVzb3VyY2UuYXhkP3R5cGU9Y2FoJmFtcDtpc2M9ZmFsc2UmYW1wO2d1aWQ9NGZmNDQ4ZTEtZmJkZS00NjM5LTljZGEtNTU5MGQ2OWZjNWZlZAIDDxYEHwsFE0Rvd25sb2FkIEF1ZGlvIENvZGUfDAVlfi9UZWxlcmlrLldlYi5VSS5XZWJSZXNvdXJjZS5heGQ/dHlwZT1jYWgmYW1wO2lzYz1mYWxzZSZhbXA7Z3VpZD00ZmY0NDhlMS1mYmRlLTQ2MzktOWNkYS01NTkwZDY5ZmM1ZmVkAgEPDxYKHwQbAAAAAAAASUABAAAAHwUbAAAAAACAZkABAAAAHwYFCmltYWdlQ2xhc3MfBwVdfi9UZWxlcmlrLldlYi5VSS5XZWJSZXNvdXJjZS5heGQ/dHlwZT1yY2EmaXNjPWZhbHNlJmd1aWQ9NGZmNDQ4ZTEtZmJkZS00NjM5LTljZGEtNTU5MGQ2OWZjNWZlHwgCggNkZAICDxYEHwsFDkdldCBBdWRpbyBDb2RlHwwFZX4vVGVsZXJpay5XZWIuVUkuV2ViUmVzb3VyY2UuYXhkP3R5cGU9Y2FoJmFtcDtpc2M9ZmFsc2UmYW1wO2d1aWQ9NGZmNDQ4ZTEtZmJkZS00NjM5LTljZGEtNTU5MGQ2OWZjNWZlZAIDDxYEHwsFE0Rvd25sb2FkIEF1ZGlvIENvZGUfDAVlfi9UZWxlcmlrLldlYi5VSS5XZWJSZXNvdXJjZS5heGQ/dHlwZT1jYWgmYW1wO2lzYz1mYWxzZSZhbXA7Z3VpZD00ZmY0NDhlMS1mYmRlLTQ2MzktOWNkYS01NTkwZDY5ZmM1ZmVkAgQPZBYCZg8WBB8KBRdNaXNzaW5nIEJyb3dzZXIgUGx1Zy1Jbh8LBRdNaXNzaW5nIEJyb3dzZXIgUGx1Zy1JbmQCBQ9kFgRmDw8WCh8GZR4JQWNjZXNzS2V5ZR4IVGFiSW5kZXgBAAAeB1Rvb2xUaXBlHwgCAmRkAgEPDxYGHwZlHwkFHFR5cGUgdGhlIGNvZGUgZnJvbSB0aGUgaW1hZ2UfCAICZGQCBw8PFgIfCQWfBjxsaT48YSBocmVmPScvaW5kZXguYXNweCc+2KfZhNix2KbZitiz2YrYqTwvYT48L2xpPjxsaT48YSBocmVmPScvdmVyaWZ5L3NhbmFkc2VydmljZS5hc3B4Jz7Yp9mE2KrYrdmC2YIg2YXZhiDYp9mE2YXYudin2YXZhNin2Ko8L2E+PC9saT48bGk+PGEgaHJlZj0naHR0cDovL3d3dy5jaGFtYmVyLnNhL0hvbWUvQ29udGFjdFVzL0ZBUS9QYWdlcy9kZWZhdWx0LmFzcHgnPtin2YTYo9iz2KbZhNipINin2YTYtNin2KbYudipPC9hPjwvbGk+PGxpPjxhIGhyZWY9J2h0dHA6Ly93d3cuY2hhbWJlci5zYS9Ib21lL0NvbnRhY3RVcy9Db250YWN0VXMvUGFnZXMvZGVmYXVsdC5hc3B4Jz7Yp9mE2LTZg9in2YjZiSDZiNin2YTYp9mC2KrYsdin2K3Yp9iqPC9hPjwvbGk+PGxpPjxhIGhyZWY9J2h0dHA6Ly93d3cuY2hhbWJlci5zYS9Ib21lL0NvbnRhY3RVcy9Db250YWN0VXMvUGFnZXMvZGVmYXVsdC5hc3B4Jz7Yp9iq2LXZhCDYqNmG2Kc8L2E+PC9saT48bGk+PGEgaHJlZj0naHR0cDovL3d3dy5jaGFtYmVyLnNhL0hvbWUvQnJhbmNoZXMvUGFnZXMvaW5kZXguYXNweCc+2YHYsdmI2Lkg2KfZhNi62LHZgdipIDwvYT48L2xpPjxsaT48YSBocmVmPSdodHRwOi8vd3d3LmNoYW1iZXIuc2EvSG9tZS9Db250YWN0VXMvUGFnZXMvUmVnaXN0ZXJJbnRlcmVzdHMuYXNweCc+2KrYs9is2YrZhCDYp9mE2KfZh9iq2YXYp9mF2KfYqjwvYT48L2xpPjxsaT48YSBocmVmPSdodHRwczovL2NoYW1iZXIuc2EvU0xBL1BhZ2VzL2RlZmF1bHQuYXNweCc+2KfYqtmB2KfZgtmK2Kkg2YXYs9iq2YjZiSDYp9mE2K7Yr9mF2Kk8L2E+PC9saT5kZAIJDw8WAh8JBa4EPGxpPjxhIGhyZWY9J2h0dHBzOi8vdHdpdHRlci5jb20vUml5YWRoQ2hhbWJlcicgdGFyZ2V0PSdfYmxhbmsnPjxpIGNsYXNzPSdpY29uLXR3aXR0ZXInPjwvaT48L2E+PC9saT48bGk+PGEgaHJlZj0naHR0cHM6Ly9wbHVzLmdvb2dsZS5jb20vK1JpeWFkaENoYW1iZXInIHRhcmdldD0nX2JsYW5rJz48aSBjbGFzcz0naWNvbi1ncGx1cyc+PC9pPjwvYT48L2xpPjxsaT48YSBocmVmPSdodHRwczovL3d3dy5mYWNlYm9vay5jb20vUml5YWRoQ2hhbWJlcj9yZWY9aGwnIHRhcmdldD0nX2JsYW5rJz48aSBjbGFzcz0naWNvbi1mYWNlYm9vayc+PC9pPjwvYT48L2xpPjxsaT48YSBocmVmPSdodHRwczovL3d3dy5saW5rZWRpbi5jb20vY29tcGFueS9yaXlhZGhjaGFtYmVyLycgdGFyZ2V0PSdfYmxhbmsnPjxpIGNsYXNzPSdpY29uLWxpbmtlZGluJz48L2k+PC9hPjwvbGk+PGxpPjxhIGhyZWY9J2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3VzZXIvUml5YWRoQ2hhbWJlcj9mZWF0dXJlPW1oZWUnIHRhcmdldD0nX2JsYW5rJz48aSBjbGFzcz0naWNvbi15b3V0dWJlJz48L2k+PC9hPjwvbGk+ZGQCCw8PFgIfCQUq2KzZhdmK2Lkg2KfZhNit2YLZiNmCINmF2K3ZgdmI2LjYqSDCqSAyMDIxZGQCDQ8PFgIfCQUq2YTZhNin2LPYqtmB2LPYp9ixINmI2KfZhNiv2LnZhSDYp9mE2YHZhtmKZGQCDw8PFgIfCQUJOTIwMDA0NTY1ZGQCEQ8PFgIfCQUBIGRkGAIFHl9fQ29udHJvbHNSZXF1aXJlUG9zdEJhY2tLZXlfXxYBBR1jdGwwMCRNYWluQ29udGVudCRSYWRDYXB0Y2hhMwUdY3RsMDAkTWFpbkNvbnRlbnQkUmFkQ2FwdGNoYTMPFCsAAgUkNGZmNDQ4ZTEtZmJkZS00NjM5LTljZGEtNTU5MGQ2OWZjNWZlBgAAAAAAAAAAZN8+ohTA79hnYwEz2TMsY6UinJJA">
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['ctl01'];
+if (!theForm) {
+    theForm = document.ctl01;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="js/WebResource--22c325d6f7c67a19.axd" type="text/javascript"></script>
+
+
+<script src="js/ScriptResource--30a41baf8819a4c4.axd" type="text/javascript"></script>
+<script src="js/ScriptResource--27ad5b467058626a.axd" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+if (typeof(Sys) === 'undefined') throw new Error('ASP.NET Ajax client-side framework failed to load.');
+//]]>
+</script>
+
+<script src="js/ScriptResource--80242ea40f099df7.axd" type="text/javascript"></script>
+<script src="js/ScriptResource--4e19c3af18372217.axd" type="text/javascript"></script>
+<script src="js/ScriptResource--34f33c54da5045f9.axd" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+function WebForm_OnSubmit() {
+if (typeof(ValidatorOnSubmit) == "function" && ValidatorOnSubmit() == false) return false;
+return true;
+}
+//]]>
+</script>
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="403E47EA">
+	<input type="hidden" name="__SCROLLPOSITIONX" id="__SCROLLPOSITIONX" value="0">
+	<input type="hidden" name="__SCROLLPOSITIONY" id="__SCROLLPOSITIONY" value="0">
+</div>
+        <div id="layout">
+            <header>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-6 col-xs-12 logos">
+                            <a href="Login.aspx.html" class="secondary-logo" data-cloned-control-id="control-926a5178a2e60895" data-cloned-control-category="ORIGINAL_LINK">
+                                <img class="img-responsive" src="images/designversion3/Login/secondary-logo.png" alt="">
+                            </a>
+                            <!--  /.secondary-logo -->
+                        </div>
+                        <!--  /.col-md-4 col-sm-6 col-xs-12 -->
+                        <div class="col-md-4 col-sm-6 col-xs-12 logos">
+                            <a href="http://chamber.sa/" target="_blank" class="primary-logo" data-cloned-control-id="control-46507f85d011a4e4" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer">
+                                <img class="img-responsive" src="images/designversion3/Login/primary-logo.png" alt="">
+                            </a>
+                            <!--  /.primary-logo -->
+                        </div>
+                        <!--  /.col-md-4 col-sm-6 col-xs-12 -->
+                        <div class="col-md-4 col-xs-12">
+                            <div class="dropdown" style="display: none">
+                                <button id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-cloned-control-id="control-a5ef31837bd86058" data-cloned-control-category="LOCAL_DOM_ACTION">
+                                    <img src="images/designversion3/Login/profile-icon.png" alt="">
+                                    <a href="RegistrationConditions.aspx.html" data-cloned-control-id="control-e3faa81f0a8d2c8e" data-cloned-control-category="ORIGINAL_LINK">
+                                        <span id="lblNewUserRegistration">تسجيل مستخدم جديد</span></a>
+                                    <span class="caret"></span>
+
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="dLabel">
+                                    <li>&nbsp;</li>
+                                </ul>
+                            </div>
+                            <h2>بوابة أعمالي</h2>
+                        </div>
+                        <!--  /.col-md-4 col-xs-12 -->
+                    </div>
+                    <!--  /.row -->
+                </div>
+                <!--  /.container -->
+            </header>
+            <section class="container">
+                <section class="homeContent">
+                    <section class="rightBlock">
+                    </section>
+                    <section class="leftBlock">
+                    </section>
+                    <!--EndLeftBlock-->
+                </section>
+                <!--EndHomeContent-->
+                <section class="internalContent">
+                    <div class="row">
+                        <aside class="rightBlock opened col-md-3 col-xs-12">
+
+                            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+
+                                
+
+                                
+                                
+                            </div>
+                        </aside>
+                        
+                         <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ctl00$ToolkitScriptManager1', 'ctl01', ['tctl00$MainContent$updatePanelPR','MainContent_updatePanelPR'], [], [], 90, 'ctl00');
+//]]>
+</script>
+
+                        
+    <div class="modal fade bd-example-modal-lg" id="myModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="text-center">التحميلات</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-12 text-center">
+                        <a href="https://chamber.sa/Documents/2026/MyBusinessUserGuide.pdf" class="text-primary" target="_blank" data-cloned-control-id="control-39183b6995b7be09" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer">دليل المستخدم</a>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 text-center">
+                        <a href="https://chamber.sa/EServices/Documents/MY%20Business%20Portal.pdf" class="text-primary" target="_blank" data-cloned-control-id="control-d9b8db56931ede82" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer">User Manual</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer center-block">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" data-cloned-control-id="control-e94599f6b6c434d9" data-cloned-control-category="LOCAL_DOM_ACTION">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="modal fade bd-example-modal-lg" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="text-center">التحميلات</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-12 text-center">
+                         <a href="https://chamber.sa/EServices/Documents/10122020.pdf" class="text-primary" target="_blank" data-cloned-control-id="control-fa9a9d76acf62f93" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer">الدليل التعريفي</a>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12 text-center">
+                         <a href="https://chamber.sa/EServices/Documents/UserManualInfoEng.pdf" class="text-primary" target="_blank" data-cloned-control-id="control-79f573676fb3e905" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer">Induction Guide</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer center-block">
+                <button type="button" class="btn btn-danger" data-dismiss="modal" data-cloned-control-id="control-7897d09beb43e2d8" data-cloned-control-category="LOCAL_DOM_ACTION">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="MainContent_updatePanelPR">
+	
+
+
+            
+            <section class="leftBlock opened col-md-9 col-xs-12">
+                <section class="login">
+
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <div>
+                            <!-- Nav tabs -->
+                            <ul class="nav nav-tabs" id="#myTabs" role="tablist">
+                                <li id="MainContent_li1" role="presentation" class="active"><a href="#gate" aria-controls="gate" role="tab" data-toggle="tab" data-cloned-control-id="control-03c52c4677dbf592" data-cloned-control-category="LOCAL_DOM_ACTION">بوابة اعمالى</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane fade in active" id="gate">
+                                    <div id="MainContent_pnlResetPassword">
+		
+                                        <input name="ctl00$MainContent$UserName" type="text" onchange="javascript:setTimeout('__doPostBack(\'ctl00$MainContent$UserName\',\'\')', 0)" onkeypress="if (WebForm_TextBoxKeyHandler(event) == false) return false;" id="MainContent_UserName" placeholder="إسم المستخدم">
+                                        <span id="MainContent_UserNameRequired" style="color:Red;font-size:22px;visibility:hidden;">*</span>
+                                        <select name="ctl00$MainContent$ddlRetrieveTo" onchange="javascript:setTimeout('__doPostBack(\'ctl00$MainContent$ddlRetrieveTo\',\'\')', 0)" id="MainContent_ddlRetrieveTo">
+			<option selected="selected" value="">استعادة كلمة المرور</option>
+			<option value="1">البريد الالكتروني</option>
+			<option value="2">رقم الجوال</option>
+
+		</select><br>
+                                        
+                                        <span id="MainContent_lblMaskedString" class="localText"></span>
+                                        <span id="MainContent_reqddlRetrieveTo" style="color:Red;font-size:22px;visibility:hidden;">*</span>
+                                        <div id="ctl00_MainContent_RadCaptcha3" class="RadCaptcha RadCaptcha_Default  radCaptcha">
+			<!-- 2026.1.421.462 --><span id="ctl00_MainContent_RadCaptcha3_ctl00" style="visibility:hidden;">رمز الصورة المدخل خاطئ</span><div id="ctl00_MainContent_RadCaptcha3_SpamProtectorPanel" class="radCaptcha">
+				<img id="ctl00_MainContent_RadCaptcha3_CaptchaImage" class="imageClass" alt="" src="assets/Telerik.Web.UI.WebResource--11c448c70b17ba9f.axd" style="height:50px;width:180px;display:block;"><p><input name="ctl00$MainContent$RadCaptcha3$CaptchaTextBox" type="text" maxlength="6" id="ctl00_MainContent_RadCaptcha3_CaptchaTextBox" placeholder="أدخل الرمز المرئي" autocomplete="off"><label for="ctl00_MainContent_RadCaptcha3_CaptchaTextBox" id="ctl00_MainContent_RadCaptcha3_CaptchaTextBoxLabel">Type the code from the image</label></p>
+			</div><input id="ctl00_MainContent_RadCaptcha3_ClientState" name="ctl00_MainContent_RadCaptcha3_ClientState" type="hidden" autocomplete="off">
+		</div>
+                                        <span style="color: red">
+                                            </span>
+                                        <br>
+                                        <input type="submit" name="ctl00$MainContent$SubmitButton" value="إرسال" id="MainContent_SubmitButton" class="btn" data-cloned-control-id="control-b3e6d47203a7d5be" data-cloned-control-category="PROTECTED_OR_UNSUPPORTED">
+                                        <div class="row">
+                                            <div class="col-md-6 col-lg-6 col-xs-12" style="float:">
+                                                <a href="getusername.aspx.html" class="forget" data-cloned-control-id="control-3ccaafac13d224db" data-cloned-control-category="ORIGINAL_LINK">نسيت اسم المستخدم ؟</a>&nbsp;
+                                            </div>
+                                            <div class="col-md-6 col-lg-6 col-xs-12">
+                                                <a href="Login.aspx.html" class="forget1" data-cloned-control-id="control-b61d6a7d3c4c8b3d" data-cloned-control-category="ORIGINAL_LINK">الرجوع لصفحة الدخول</a>
+                                            </div>
+                                        </div>
+                                        
+                                
+                                    
+	</div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="round col-md-6 col-sm-5 col-xs-12">
+                <h4>بوابة أعمالي – بوابة الخدمات الإلكترونية لغرفة الرياض : </h4>
+                <p>
+                    تعد بوابة الخدمات الإلكترونية لغرفة الرياض (بوابة أعمالي) كأهم مبادرات غرفة الرياض لتحقيق أحد أهدافها الاستراتيجية المتمثل بالانتقال في تقديم خدماتها إلى مفهوم "الغرفة الإلكترونية" باستخدام أحدث النظم المتطورة في مجال تقنية المعلومات،ليتسنى لعملاء الغرفة من إنجاز أعمالهم بكل يسر وسهولة في بيئة عمل متطورة ومثالية. 
+
+                </p>
+                
+                <div class="business">
+                    <div class="row">
+                        <div class="col-md-4 col-lg-4 col-xs-12">
+                            <a style="cursor:pointer" target="_blank" data-cloned-control-id="control-ff4e541decae3944" data-cloned-control-category="PROTECTED_OR_UNSUPPORTED">
+                        <img src="images/designversion3/login/note.png" alt="" style="width:80px;height:90px">
+                        <span>دليل المستخدم</span>
+                                
+                    </a>
+                        </div>
+                        <div class="col-md-4 col-lg-4 col-xs-12">
+                             <a href="https://chamber.sa/EServices/Documents/12092020.pdf" target="_blank" data-cloned-control-id="control-0019b8c08ba71284" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer">
+                        <img src="images/designversion3/login/icon99.png" alt="" style="width:80px;height:90px">
+                        <span>تعميم الخدمات الإلكترونية </span>
+                                 </a>
+                        </div>
+                        <div class="col-md-4 col-lg-4 col-xs-12">
+                            <a style="cursor:pointer" target="_blank" data-cloned-control-id="control-d66674c22196e5e6" data-cloned-control-category="PROTECTED_OR_UNSUPPORTED">
+                        <img src="images/designversion3/login/icon7.png" alt="" style="width:80px;height:90px">
+                        <span>الدليل التعريفي</span>
+                    </a>
+                        </div>
+                    
+                    
+                </div>
+                    <br>
+                    <div class="row">
+                        
+                    
+                   
+
+                    </div>
+                    </div>
+            </div>
+                </section>
+            </section>
+           
+    
+    <script src="js/Scripts/DesignVersion3/Login/autoplay.js"></script>
+
+     <script type="text/javascript">
+
+
+         document.getElementsByName('ctl00$MainContent$RadCaptcha3$CaptchaTextBox')[0].placeholder = 'أدخل الرمز المرئي';
+
+          function showModal() {
+             $("#myModal").modal('show');
+         }
+         function showModal1() {
+             $("#myModal1").modal('show');
+         }
+
+         </script>
+        
+</div>
+
+                    </div>
+                </section>
+                <!--EndHomeContent-->
+
+                <!--EndLeftBlock-->
+
+            </section>
+
+
+            <footer>
+                <nav class="footer-nav">
+                    <div class="container">
+                        <ul>
+                            <span id="lblfooterMainLinks"><li><a href="index.aspx.html" data-cloned-control-id="control-850b6ddfa2065227" data-cloned-control-category="ORIGINAL_LINK">الرئيسية</a></li><li><a href="verify/sanadservice.aspx.html" data-cloned-control-id="control-de9e7ea95cdd35dc" data-cloned-control-category="ORIGINAL_LINK">التحقق من المعاملات</a></li><li><a href="http://www.chamber.sa/Home/ContactUs/FAQ/Pages/default.aspx" data-cloned-control-id="control-ad7af1a007902177" data-cloned-control-category="ORIGINAL_LINK">الأسئلة الشائعة</a></li><li><a href="http://www.chamber.sa/Home/ContactUs/ContactUs/Pages/default.aspx" data-cloned-control-id="control-96e8cd8abbb4c80b" data-cloned-control-category="ORIGINAL_LINK">الشكاوى والاقتراحات</a></li><li><a href="http://www.chamber.sa/Home/ContactUs/ContactUs/Pages/default.aspx" data-cloned-control-id="control-ccb1f56faf04a376" data-cloned-control-category="ORIGINAL_LINK">اتصل بنا</a></li><li><a href="http://www.chamber.sa/Home/Branches/Pages/index.aspx" data-cloned-control-id="control-dc8297ef716e3bd9" data-cloned-control-category="ORIGINAL_LINK">فروع الغرفة </a></li><li><a href="http://www.chamber.sa/Home/ContactUs/Pages/RegisterInterests.aspx" data-cloned-control-id="control-aeaabbc7bf7c0909" data-cloned-control-category="ORIGINAL_LINK">تسجيل الاهتمامات</a></li><li><a href="https://chamber.sa/SLA/Pages/default.aspx" data-cloned-control-id="control-84fcaa4610dbc8ae" data-cloned-control-category="ORIGINAL_LINK">اتفاقية مستوى الخدمة</a></li></span>
+                        </ul>
+                    </div>
+                    <!--  /.container -->
+                </nav>
+                <!--  /.footer-nav -->
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4 col-xs-12">
+                            <ul class="social">
+                                <span id="lblSocialLinks"><li><a href="https://twitter.com/RiyadhChamber" target="_blank" data-cloned-control-id="control-8fce2ef3b3d47862" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer"><i class="icon-twitter"></i></a></li><li><a href="https://plus.google.com/+RiyadhChamber" target="_blank" data-cloned-control-id="control-75f8f97f0ffebfab" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer"><i class="icon-gplus"></i></a></li><li><a href="https://www.facebook.com/RiyadhChamber?ref=hl" target="_blank" data-cloned-control-id="control-017ceb82f9d80ffc" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer"><i class="icon-facebook"></i></a></li><li><a href="https://www.linkedin.com/company/riyadhchamber/" target="_blank" data-cloned-control-id="control-6dd7aeaeed7201ad" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer"><i class="icon-linkedin"></i></a></li><li><a href="https://www.youtube.com/user/RiyadhChamber?feature=mhee" target="_blank" data-cloned-control-id="control-56de75e257d4de93" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer"><i class="icon-youtube"></i></a></li></span>
+                            </ul>
+                            <!--  /.social -->
+                            <dfn class="copy">
+                                <span id="lblCopyRight">جميع الحقوق محفوظة © 2021</span></dfn>
+                        </div>
+                        <!--  /.col-md-4 col-xs-12 -->
+                        <div class="col-md-4 col-xs-12">
+                            <div class="support text-center">
+                                <p>
+                                    <span id="lblContactTitle">للاستفسار والدعم الفني</span>
+                                </p>
+                                <p class="phone">
+                                    <span id="lblContactNumber">920004565</span>
+                                </p>
+                                <!--  /.phone -->
+                                <p class="mail">
+                                    <span id="lblContactEmail"> </span>
+                                </p>
+                                <!--  /.mail -->
+                            </div>
+                            <!--  /.support -->
+                        </div>
+                        <!--  /.col-md-4 col-xs-12 -->
+                        <div class="col-md-4 col-xs-12">
+                            <div class="text-left logo">
+                                <img src="images/designversion3/Login/primary-logo.png" alt="">
+                            </div>
+                            <!--  /.text-left -->
+                        </div>
+                        <!--  /.col-md-4 col-xs-12 -->
+                        
+                        <div class="app-download text-center">
+                           <p>&nbsp;</p>
+                            <a href="https://play.google.com/store/apps/details?id=com.gov.sa.newriyadhchamberandroid&amp;amp;hl=en" target="_blank" data-cloned-control-id="control-98dbfafe4a6d115e" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer">
+                                <img src="images/designversion3/login/gIcon.svg" alt="Download on Google Play" class="app-badge google">
+                            </a>
+                            <a href="https://apps.apple.com/sa/app/%D8%A8%D9%88%D8%A7%D8%A8%D8%A9-%D8%A3%D8%B9%D9%85%D8%A7%D9%84%D9%8A/id1530349012" target="_blank" data-cloned-control-id="control-5341e15c08556229" data-cloned-control-category="ORIGINAL_LINK" rel="noopener noreferrer">
+                                <img src="images/designversion3/login/ipIcon.svg" alt="Download on the App Store" class="app-badge ">
+                            </a>
+                        </div>
+                    </div>
+                    <!--  /.row -->
+                </div>
+                <!--  /.container -->
+            </footer>
+        </div>
+    
+<script type="text/javascript">
+//<![CDATA[
+var Page_Validators =  new Array(document.getElementById("MainContent_UserNameRequired"), document.getElementById("MainContent_reqddlRetrieveTo"), document.getElementById("ctl00_MainContent_RadCaptcha3_ctl00"));
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+var MainContent_UserNameRequired = document.all ? document.all["MainContent_UserNameRequired"] : document.getElementById("MainContent_UserNameRequired");
+MainContent_UserNameRequired.controltovalidate = "MainContent_UserName";
+MainContent_UserNameRequired.errormessage = "*";
+MainContent_UserNameRequired.validationGroup = "RetrievePassword";
+MainContent_UserNameRequired.evaluationfunction = "RequiredFieldValidatorEvaluateIsValid";
+MainContent_UserNameRequired.initialvalue = "";
+var MainContent_reqddlRetrieveTo = document.all ? document.all["MainContent_reqddlRetrieveTo"] : document.getElementById("MainContent_reqddlRetrieveTo");
+MainContent_reqddlRetrieveTo.controltovalidate = "MainContent_ddlRetrieveTo";
+MainContent_reqddlRetrieveTo.errormessage = "*";
+MainContent_reqddlRetrieveTo.validationGroup = "RetrievePassword";
+MainContent_reqddlRetrieveTo.evaluationfunction = "RequiredFieldValidatorEvaluateIsValid";
+MainContent_reqddlRetrieveTo.initialvalue = "";
+var ctl00_MainContent_RadCaptcha3_ctl00 = document.all ? document.all["ctl00_MainContent_RadCaptcha3_ctl00"] : document.getElementById("ctl00_MainContent_RadCaptcha3_ctl00");
+ctl00_MainContent_RadCaptcha3_ctl00.errormessage = "رمز الصورة المدخل خاطئ";
+ctl00_MainContent_RadCaptcha3_ctl00.validationGroup = "RetrievePassword";
+ctl00_MainContent_RadCaptcha3_ctl00.evaluationfunction = "CustomValidatorEvaluateIsValid";
+//]]>
+</script>
+
+
+<script type="text/javascript">
+//<![CDATA[
+
+var Page_ValidationActive = false;
+if (typeof(ValidatorOnLoad) == "function") {
+    ValidatorOnLoad();
+}
+
+function ValidatorOnSubmit() {
+    if (Page_ValidationActive) {
+        return ValidatorCommonOnSubmit();
+    }
+    else {
+        return true;
+    }
+}
+        
+theForm.oldSubmit = theForm.submit;
+theForm.submit = WebForm_SaveScrollPositionSubmit;
+
+theForm.oldOnSubmit = theForm.onsubmit;
+theForm.onsubmit = WebForm_SaveScrollPositionOnSubmit;
+
+document.getElementById('MainContent_UserNameRequired').dispose = function() {
+    Array.remove(Page_Validators, document.getElementById('MainContent_UserNameRequired'));
+}
+
+document.getElementById('MainContent_reqddlRetrieveTo').dispose = function() {
+    Array.remove(Page_Validators, document.getElementById('MainContent_reqddlRetrieveTo'));
+}
+
+document.getElementById('ctl00_MainContent_RadCaptcha3_ctl00').dispose = function() {
+    Array.remove(Page_Validators, document.getElementById('ctl00_MainContent_RadCaptcha3_ctl00'));
+}
+Sys.Application.add_init(function() {
+    $create(Telerik.Web.UI.RadCaptcha, {"_audioUrl":"/Telerik.Web.UI.WebResource.axd?type=cah\u0026isc=false\u0026guid=4ff448e1-fbde-4639-9cda-5590d69fc5fe","_enableAudio":false,"_persistCode":false,"clientStateFieldID":"ctl00_MainContent_RadCaptcha3_ClientState"}, null, null, $get("ctl00_MainContent_RadCaptcha3"));
+});
+//]]>
+</script>
+</form>
+
+
+</body></html>
